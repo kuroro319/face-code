@@ -1,0 +1,98 @@
+[
+  {
+    "code": "RLOH",
+    "name": "花形",
+    "file": "face_characters\\RLOH_花形.png",
+    "success": true
+  },
+  {
+    "code": "RLOM",
+    "name": "指揮官",
+    "file": "face_characters\\RLOM_指揮官.png",
+    "success": true
+  },
+  {
+    "code": "RLSH",
+    "name": "クリエイター",
+    "file": "face_characters\\RLSH_クリエイター.png",
+    "success": true
+  },
+  {
+    "code": "RLSM",
+    "name": "プロデューサー",
+    "file": "face_characters\\RLSM_プロデューサー.png",
+    "success": true
+  },
+  {
+    "code": "RGOH",
+    "name": "外交官",
+    "file": "face_characters\\RGOH_外交官.png",
+    "success": true
+  },
+  {
+    "code": "RGOM",
+    "name": "戦略家",
+    "file": "face_characters\\RGOM_戦略家.png",
+    "success": true
+  },
+  {
+    "code": "RGSH",
+    "name": "探偵",
+    "file": "face_characters\\RGSH_探偵.png",
+    "success": true
+  },
+  {
+    "code": "RGSM",
+    "name": "革命家",
+    "file": "face_characters\\RGSM_革命家.png",
+    "success": true
+  },
+  {
+    "code": "ALOH",
+    "name": "カウンセラー",
+    "file": "face_characters\\ALOH_カウンセラー.png",
+    "success": true
+  },
+  {
+    "code": "ALOM",
+    "name": "伝道師",
+    "file": "face_characters\\ALOM_伝道師.png",
+    "success": true
+  },
+  {
+    "code": "ALSH",
+    "name": "幻想家",
+    "file": "face_characters\\ALSH_幻想家.png",
+    "success": true
+  },
+  {
+    "code": "ALSM",
+    "name": "守護者",
+    "file": "face_characters\\ALSM_守護者.png",
+    "success": true
+  },
+  {
+    "code": "AGOH",
+    "name": "哲学者",
+    "file": "face_characters\\AGOH_哲学者.png",
+    "success": true
+  },
+  {
+    "code": "AGOM",
+    "name": "研究者",
+    "file": "face_characters\\AGOM_研究者.png",
+    "success": true
+  },
+  {
+    "code": "AGSH",
+    "name": "予言者",
+    "file": "face_characters\\AGSH_予言者.png",
+    "success": true
+  },
+  {
+    "code": "AGSM",
+    "name": "賢者",
+    "file": "face_characters\\AGSM_賢者.png",
+    "success": true
+  }
+]
