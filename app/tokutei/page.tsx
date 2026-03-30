@@ -13,10 +13,7 @@ const rows: { label: string; value: string }[] = [
   { label: "電話番号", value: "請求があれば遅滞なく開示します" },
   { label: "メールアドレス", value: "[メールアドレス]" },
   { label: "販売URL", value: "https://face-code.vercel.app（またはご利用のURL）" },
-  {
-    label: "販売価格",
-    value: "以下のプランをご参照ください",
-  },
+  { label: "販売価格", value: "以下のプランをご参照ください" },
   { label: "商品代金以外の必要料金", value: "なし（通信料・接続料はお客様負担）" },
   { label: "支払方法", value: "クレジットカード決済" },
   { label: "支払時期", value: "購入手続き完了時" },
@@ -31,21 +28,21 @@ const rows: { label: string; value: string }[] = [
 
 const plans = [
   {
-    name: "ベーシック診断",
+    name: "ライト",
     price: "¥200",
-    desc: "1回の詳細診断レポート",
+    desc: "相性一覧・恋愛傾向の詳細",
     type: "買い切り",
   },
   {
-    name: "プレミアム診断",
-    price: "¥480",
-    desc: "詳細診断レポート＋有名人比較・深掘り分析",
+    name: "フル",
+    price: "¥580",  // ← 修正
+    desc: "ライト内容＋メイク・隠れた一面・仕事運財運",
     type: "買い切り",
   },
   {
-    name: "月額プラン",
-    price: "¥980 / 月",
-    desc: "月間診断し放題＋全プレミアム機能",
+    name: "継続",
+    price: "¥880 / 月",  // ← 修正
+    desc: "フル内容＋ほくろシワ詳細・季節メイク・月1再診断",
     type: "月額継続",
   },
 ]
@@ -78,7 +75,7 @@ export default function TokuteiPage() {
             <h1 className="text-3xl md:text-4xl font-black" style={{ color: "#2D2D2D" }}>
               特定商取引法に基づく表記
             </h1>
-            <p className="mt-3 text-sm" style={{ color: "#888" }}>最終更新日：2026年3月28日</p>
+            <p className="mt-3 text-sm" style={{ color: "#888" }}>最終更新日：2026年3月30日</p>
           </div>
 
           {/* Plans */}
@@ -133,7 +130,8 @@ export default function TokuteiPage() {
                     >
                       {row.label === "販売価格" ? (
                         <span>
-                          ¥200（ベーシック診断） / ¥480（プレミアム診断） / ¥980/月（月額プラン）<br />
+                          ¥200（ライト） / ¥580（フル） / ¥880/月（継続）{/* ← 修正 */}
+                          <br />
                           <span className="text-xs" style={{ color: "#888" }}>※ 表示価格はすべて税込です</span>
                         </span>
                       ) : (
@@ -151,9 +149,9 @@ export default function TokuteiPage() {
             className="mt-8 rounded-2xl p-6"
             style={{ backgroundColor: "rgba(232, 160, 160, 0.08)", border: "1px solid rgba(232, 160, 160, 0.2)" }}
           >
-            <h3 className="font-black mb-2" style={{ color: "#2D2D2D" }}>月額継続プランについて</h3>
+            <h3 className="font-black mb-2" style={{ color: "#2D2D2D" }}>継続プランについて</h3>
             <ul className="space-y-2 text-sm leading-relaxed" style={{ color: "#555" }}>
-              <li>• 月額プランは毎月自動更新されます。</li>
+              <li>• 継続プランは毎月自動更新されます。</li>
               <li>• 解約はいつでも可能です。解約後は次回更新日まで引き続きご利用いただけます。</li>
               <li>• 解約手続きは<Link href="/contact" style={{ color: "#E8A0A0" }} className="underline">お問い合わせフォーム</Link>よりお申し込みください。</li>
               <li>• 月途中での解約の場合、日割り返金は行っておりません。</li>

@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             <h1 className="text-3xl md:text-4xl font-black" style={{ color: "#2D2D2D" }}>
               プライバシーポリシー
             </h1>
-            <p className="mt-3 text-sm" style={{ color: "#888" }}>最終更新日：2026年3月28日</p>
+            <p className="mt-3 text-sm" style={{ color: "#888" }}>最終更新日：2026年3月30日</p>
           </div>
 
           <div className="space-y-10">
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
               </p>
             </section>
 
-            {/* Face Photo Policy - Highlighted */}
+            {/* Face Photo Policy - Highlighted ← ここを強化 */}
             <section
               className="rounded-2xl p-6"
               style={{ backgroundColor: "rgba(232, 160, 160, 0.08)", border: "2px solid rgba(232, 160, 160, 0.4)" }}
@@ -54,6 +54,16 @@ export default function PrivacyPage() {
                 📷 顔写真の取り扱いについて（重要）
               </h2>
               <div className="space-y-3 leading-relaxed" style={{ color: "#2D2D2D" }}>
+                {/* ← 追加 */}
+                <div
+                  className="rounded-xl p-3"
+                  style={{ backgroundColor: "rgba(232, 160, 160, 0.12)", border: "1px solid rgba(232, 160, 160, 0.4)" }}
+                >
+                  <p className="font-bold">
+                    ⚠️ アップロードできる写真はご自身の顔写真のみです。第三者の顔写真を本人の同意なくアップロードすることは禁止しており、18歳未満の第三者が写っている写真のアップロードもいかなる場合も禁止します。
+                  </p>
+                </div>
+
                 <p>
                   <span className="font-bold">顔写真はAI判定のみに使用し、サーバーに保存しません。</span>アップロードされた顔写真は、診断処理が完了した後、直ちに破棄されます。
                 </p>
@@ -170,9 +180,22 @@ export default function PrivacyPage() {
               </p>
             </section>
 
-            {/* Section 7 */}
+            {/* Section 7 ← 追加 */}
             <section>
-              <h2 className="text-xl font-black mb-4" style={{ color: "#2D2D2D" }}>第7条（プライバシーポリシーの変更）</h2>
+              <h2 className="text-xl font-black mb-4" style={{ color: "#2D2D2D" }}>第7条（ユーザーの行為に起因するトラブルの免責）</h2>
+              <div className="leading-relaxed space-y-3" style={{ color: "#555" }}>
+                <p>
+                  ユーザーが第三者の顔写真を本人の同意なくアップロードしたこと、または診断結果を第三者へのいじめ・誹謗中傷・ハラスメント・差別目的で使用したことに起因して生じたトラブル・損害（名誉毀損・プライバシー侵害・精神的損害等を含む）については、運営者は一切の責任を負いません。
+                </p>
+                <p>
+                  当該行為を行ったユーザーが自己の責任において解決するものとし、運営者に損害が生じた場合はユーザーがその損害を賠償するものとします。
+                </p>
+              </div>
+            </section>
+
+            {/* Section 8 （旧7） */}
+            <section>
+              <h2 className="text-xl font-black mb-4" style={{ color: "#2D2D2D" }}>第8条（プライバシーポリシーの変更）</h2>
               <p className="leading-relaxed" style={{ color: "#555" }}>
                 本ポリシーの内容は変更されることがあります。変更後のプライバシーポリシーは、本ページに掲載した時点で効力を生じるものとします。重要な変更がある場合は、サービス上でお知らせします。
               </p>

@@ -1,36 +1,82 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, Users, Sparkles, Eye, ChevronRight, Check, Lock, CreditCard } from "lucide-react"
+import { Heart, Users, Sparkles, Eye, ChevronRight, Check, Lock, CreditCard, RefreshCw, Flower2, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-type PlanType = "light" | "full"
+type PlanType = "light" | "full" | "subscription"
 
-export function UpgradeCta() {
+interface UpgradeCtaProps {
+  code: string
+}
+
+export function UpgradeCta({ code }: UpgradeCtaProps) {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("full")
+  const [loading, setLoading] = useState(false)
 
   const plans = {
     light: {
-      name: "Light",
+      name: "ライト",
       price: "¥200",
+      priceNote: "1回限り",
       features: [
         { icon: Users, label: "16タイプとの相性一覧", included: true },
         { icon: Heart, label: "恋愛傾向の詳細", included: true },
         { icon: Sparkles, label: "メイクアドバイス", included: false },
         { icon: Eye, label: "隠れた一面の分析", included: false },
+        { icon: RefreshCw, label: "仕事運・財運", included: false },
+        { icon: Flower2, label: "ほくろ・シワ詳細診断", included: false },
+        { icon: Moon, label: "季節メイク・月1再診断", included: false },
       ]
     },
     full: {
-      name: "Full",
-      price: "¥480",
+      name: "フル",
+      price: "¥580",
+      priceNote: "1回限り",
       features: [
         { icon: Users, label: "16タイプとの相性一覧", included: true },
         { icon: Heart, label: "恋愛傾向の詳細", included: true },
         { icon: Sparkles, label: "メイクアドバイス", included: true },
         { icon: Eye, label: "隠れた一面の分析", included: true },
+        { icon: RefreshCw, label: "仕事運・財運", included: true },
+        { icon: Flower2, label: "ほくろ・シワ詳細診断", included: false },
+        { icon: Moon, label: "季節メイク・月1再診断", included: false },
+      ]
+    },
+    subscription: {
+      name: "継続",
+      price: "¥880",
+      priceNote: "/月",
+      features: [
+        { icon: Users, label: "16タイプとの相性一覧", included: true },
+        { icon: Heart, label: "恋愛傾向の詳細", included: true },
+        { icon: Sparkles, label: "メイクアドバイス", included: true },
+        { icon: Eye, label: "隠れた一面の分析", included: true },
+        { icon: RefreshCw, label: "仕事運・財運", included: true },
+        { icon: Flower2, label: "ほくろ・シワ詳細診断", included: true },
+        { icon: Moon, label: "季節メイク・月1再診断", included: true },
       ]
     }
   }
+
+  const handlePurchase = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: selectedPlan, code }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const currentPlan = plans[selectedPlan]
 
   return (
     <section className="py-12 md:py-20">
@@ -63,84 +109,63 @@ export function UpgradeCta() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
-          {/* Light Plan */}
-          <button
-            onClick={() => setSelectedPlan("light")}
-            className={`relative text-left p-6 rounded-2xl border-2 transition-all ${
-              selectedPlan === "light"
-                ? "border-[#E8A0A0] bg-white shadow-lg"
-                : "border-foreground/10 bg-white/50 hover:border-foreground/20"
-            }`}
-          >
-            {selectedPlan === "light" && (
-              <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-[#E8A0A0] flex items-center justify-center">
-                <Check className="w-4 h-4 text-white" />
-              </div>
-            )}
-            <span className="inline-block px-3 py-1 bg-foreground/5 text-foreground/60 text-xs rounded-full mb-3">
-              Light
-            </span>
-            <div className="mb-4">
-              <span className="text-3xl font-bold text-foreground/90">¥200</span>
-              <span className="text-foreground/50 text-sm ml-1">（税込）</span>
-            </div>
-            <ul className="space-y-2">
-              {plans.light.features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-2 text-sm">
-                  {feature.included ? (
-                    <Check className="w-4 h-4 text-[#E8A0A0]" />
-                  ) : (
-                    <Lock className="w-4 h-4 text-foreground/30" />
-                  )}
-                  <span className={feature.included ? "text-foreground/70" : "text-foreground/40"}>
-                    {feature.label}
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          {(["light", "full", "subscription"] as PlanType[]).map((planKey) => {
+            const plan = plans[planKey]
+            const isSelected = selectedPlan === planKey
+            return (
+              <button
+                key={planKey}
+                onClick={() => setSelectedPlan(planKey)}
+                className={`relative text-left p-6 rounded-2xl border-2 transition-all ${
+                  isSelected
+                    ? "border-[#E8A0A0] bg-gradient-to-br from-white to-[#FFF8F5] shadow-lg"
+                    : "border-foreground/10 bg-white/50 hover:border-foreground/20"
+                }`}
+              >
+                {planKey === "full" && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-[#E8A0A0] to-[#D4847B] text-white text-xs rounded-full whitespace-nowrap">
+                    おすすめ
                   </span>
-                </li>
-              ))}
-            </ul>
-          </button>
-
-          {/* Full Plan */}
-          <button
-            onClick={() => setSelectedPlan("full")}
-            className={`relative text-left p-6 rounded-2xl border-2 transition-all ${
-              selectedPlan === "full"
-                ? "border-[#E8A0A0] bg-gradient-to-br from-white to-[#FFF8F5] shadow-lg"
-                : "border-foreground/10 bg-white/50 hover:border-foreground/20"
-            }`}
-          >
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-[#E8A0A0] to-[#D4847B] text-white text-xs rounded-full">
-              おすすめ
-            </span>
-            {selectedPlan === "full" && (
-              <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-[#E8A0A0] flex items-center justify-center">
-                <Check className="w-4 h-4 text-white" />
-              </div>
-            )}
-            <span className="inline-block px-3 py-1 bg-[#E8A0A0]/10 text-[#E8A0A0] text-xs rounded-full mb-3">
-              Full
-            </span>
-            <div className="mb-4">
-              <span className="text-3xl font-bold text-foreground/90">¥480</span>
-              <span className="text-foreground/50 text-sm ml-1">（税込）</span>
-            </div>
-            <ul className="space-y-2">
-              {plans.full.features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-[#E8A0A0]" />
-                  <span className="text-foreground/70">{feature.label}</span>
-                </li>
-              ))}
-            </ul>
-          </button>
+                )}
+                {isSelected && (
+                  <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-[#E8A0A0] flex items-center justify-center">
+                    <Check className="w-4 h-4 text-white" />
+                  </div>
+                )}
+                <span className={`inline-block px-3 py-1 text-xs rounded-full mb-3 ${
+                  isSelected ? "bg-[#E8A0A0]/10 text-[#E8A0A0]" : "bg-foreground/5 text-foreground/60"
+                }`}>
+                  {plan.name}
+                </span>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-foreground/90">{plan.price}</span>
+                  <span className="text-foreground/50 text-sm ml-1">{plan.priceNote}</span>
+                </div>
+                <ul className="space-y-2">
+                  {plan.features.map((feature, index) => (
+                    <li key={index} className="flex items-center gap-2 text-sm">
+                      {feature.included ? (
+                        <Check className="w-4 h-4 text-[#E8A0A0] shrink-0" />
+                      ) : (
+                        <Lock className="w-4 h-4 text-foreground/30 shrink-0" />
+                      )}
+                      <span className={feature.included ? "text-foreground/70" : "text-foreground/40"}>
+                        {feature.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </button>
+            )
+          })}
         </div>
 
         {/* Purchase CTA */}
         <div className="bg-gradient-to-br from-[#2D2A3E] to-[#1E1B2E] rounded-3xl p-6 md:p-8 text-white">
           <div className="text-center mb-6">
             <h3 className="text-xl font-serif font-semibold mb-2">
-              {selectedPlan === "light" ? "Light プラン" : "Full プラン"}を購入
+              {currentPlan.name}プランを購入
             </h3>
             <p className="text-white/60 text-sm">
               購入後すぐに詳細レポートが閲覧できます
@@ -150,10 +175,11 @@ export function UpgradeCta() {
           <Button
             size="lg"
             className="w-full bg-gradient-to-r from-[#E8A0A0] to-[#D4847B] hover:from-[#D4847B] hover:to-[#C67068] text-white border-0 rounded-full px-8 py-6 text-lg font-medium shadow-lg shadow-[#E8A0A0]/20 mb-6"
-            onClick={() => alert('購入ページへ遷移します')}
+            onClick={handlePurchase}
+            disabled={loading}
           >
-            {selectedPlan === "light" ? "¥200" : "¥480"}で購入する
-            <ChevronRight className="w-5 h-5 ml-1" />
+            {loading ? "処理中..." : `${currentPlan.price}${selectedPlan === "subscription" ? "/月" : ""}で購入する`}
+            {!loading && <ChevronRight className="w-5 h-5 ml-1" />}
           </Button>
 
           {/* Payment Methods */}

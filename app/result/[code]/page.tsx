@@ -250,7 +250,7 @@ export default async function ResultPage({
 
       <CommunityCommentsSection typeName={typeInfo.name} />
 
-      <UpgradeCta />
+      <UpgradeCta code={normalizedCode} />
 
       <ShareSection
         code={displayCode}
