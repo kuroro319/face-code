@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   // サブスク継続課金（毎月）
   if (event.type === 'invoice.payment_succeeded') {
     const invoice = event.data.object as Stripe.Invoice
-    const subscriptionId = invoice.subscription as string
+    const subscriptionId = (invoice as any).subscription as string | null
     if (subscriptionId) {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId)
       const { face_code } = subscription.metadata ?? {}
