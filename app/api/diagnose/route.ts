@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -92,7 +93,6 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: '画像データが必要です' }, { status: 400 });
     }
 
-    // data URL をパース: "data:<mediaType>;base64,<data>"
     const match = image.match(/^data:([^;]+);base64,(.+)$/);
     if (!match) {
       return Response.json({ error: '無効な画像フォーマットです' }, { status: 400 });
@@ -128,7 +128,6 @@ export async function POST(request: NextRequest) {
       throw new Error('APIからテキスト応答が返されませんでした');
     }
 
-    // ネストしたJSONを抽出
     const jsonMatch = textBlock.text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('判定結果のJSONが見つかりませんでした');
@@ -152,6 +151,17 @@ export async function POST(request: NextRequest) {
     };
     const reasons = raw['reasons'] as DiagnoseReasons | undefined;
     const code = `${breakdown.F}${breakdown.A}${breakdown.C}${breakdown.E}`;
+
+    // ── 診断ログをSupabaseに記録（失敗してもレスポンスは返す）──
+    try {
+      const supabase = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+      await supabase.from('diagnoses').insert({ type_code: code });
+    } catch (logError) {
+      console.error('診断ログ記録エラー:', logError);
+    }
 
     return Response.json({ code, breakdown, reasons });
   } catch (error) {
