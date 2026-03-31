@@ -1,7 +1,39 @@
 import Image from "next/image"
 import Link from "next/link"
+import { createClient } from "@supabase/supabase-js"
 
-export function Hero() {
+async function getStats() {
+  try {
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    // 累計診断数
+    const { count: total } = await supabase
+      .from("purchases")
+      .select("*", { count: "exact", head: true })
+
+    // 今日の診断数
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const { count: todayCount } = await supabase
+      .from("purchases")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", today.toISOString())
+
+    return {
+      total: total ?? 0,
+      today: todayCount ?? 0,
+    }
+  } catch {
+    return { total: 0, today: 0 }
+  }
+}
+
+export async function Hero() {
+  const stats = await getStats()
+
   return (
     <section className="pt-28 pb-16 px-5 overflow-hidden" style={{ position: "relative" }}>
       <div
@@ -52,8 +84,14 @@ export function Hero() {
 
           <div className="flex flex-wrap justify-center md:justify-start gap-4 mb-8">
             {[
-              { label: "累計診断数", value: "12,847人" },
-              { label: "今日の診断", value: "342人" },
+              {
+                label: "累計診断数",
+                value: stats.total > 0 ? `${stats.total.toLocaleString()}人` : "集計中",
+              },
+              {
+                label: "今日の診断",
+                value: stats.today > 0 ? `${stats.today.toLocaleString()}人` : "集計中",
+              },
               { label: "所要時間", value: "約1分" },
             ].map((s) => (
               <div
