@@ -2,11 +2,12 @@ import { ImageResponse } from 'next/og'
 import fs from 'fs'
 import path from 'path'
 
+export const runtime = 'nodejs'
+export const alt = 'FACE CODE'
 export const size = {
   width: 1200,
   height: 630,
 }
-
 export const contentType = 'image/png'
 
 // ── 型データ（page.tsx の TYPES 定数と同期） ──────────────────────────────
