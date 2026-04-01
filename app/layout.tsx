@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL ?? 'https://face-code.vercel.app'
+    process.env.NEXT_PUBLIC_BASE_URL ?? 'https://face-code-xi.vercel.app'
   ),
   title: 'FACE CODE | 顔写真でわかるあなたの本当の性格',
   description:

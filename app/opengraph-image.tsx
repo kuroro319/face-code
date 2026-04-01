@@ -1,8 +1,5 @@
 import { ImageResponse } from 'next/og'
-import fs from 'fs'
-import path from 'path'
 
-export const runtime = 'nodejs'
 export const alt = 'FACE CODE'
 export const size = {
   width: 1200,
@@ -10,14 +7,22 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-export default function Image() {
-  const imagePath = path.join(process.cwd(), 'public', '花形.png')
-  let characterDataUrl: string | null = null
+function getBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
+}
+
+export default async function Image() {
+  const baseUrl = getBaseUrl()
+  const characterSrc = `${baseUrl}/${encodeURIComponent('花形')}.png`
+
+  let imageData: ArrayBuffer | null = null
   try {
-    const buffer = fs.readFileSync(imagePath)
-    characterDataUrl = `data:image/png;base64,${buffer.toString('base64')}`
+    const res = await fetch(characterSrc)
+    if (res.ok) imageData = await res.arrayBuffer()
   } catch {
-    // 画像が読み込めない場合は非表示
+    // 画像取得失敗時はテキストのみで描画
   }
 
   return new ImageResponse(
@@ -46,6 +51,7 @@ export default function Image() {
           {/* FACE CODE ロゴ */}
           <div
             style={{
+              display: 'flex',
               fontSize: '20px',
               fontWeight: 700,
               letterSpacing: '8px',
@@ -89,6 +95,7 @@ export default function Image() {
           {/* 区切り線 */}
           <div
             style={{
+              display: 'flex',
               width: '60px',
               height: '3px',
               background: '#E8A0A0',
@@ -105,13 +112,12 @@ export default function Image() {
             justifyContent: 'center',
             width: '480px',
             height: '100%',
-            flexShrink: '0' as unknown as number,
           }}
         >
-          {characterDataUrl ? (
+          {imageData ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={characterDataUrl}
+              src={characterSrc}
               alt="花形タイプ"
               style={{
                 width: '440px',
@@ -123,8 +129,6 @@ export default function Image() {
         </div>
       </div>
     ),
-    {
-      ...size,
-    }
+    { ...size }
   )
 }
