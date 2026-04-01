@@ -59,6 +59,8 @@ export default function Image() {
           {/* メインキャッチコピー */}
           <div
             style={{
+              display: 'flex',
+              flexDirection: 'column',
               fontSize: '58px',
               fontWeight: 900,
               color: '#3D2020',
@@ -66,22 +68,22 @@ export default function Image() {
               marginBottom: '28px',
             }}
           >
-            あなたの顔が語る、
-            <br />
-            本当の自分。
+            <span>あなたの顔が語る、</span>
+            <span>本当の自分。</span>
           </div>
 
           {/* サブコピー */}
           <div
             style={{
+              display: 'flex',
+              flexDirection: 'column',
               fontSize: '22px',
               color: '#7A4040',
               lineHeight: 1.6,
             }}
           >
-            人相学×AIで導き出す、
-            <br />
-            新感覚パーソナリティ診断。
+            <span>人相学×AIで導き出す、</span>
+            <span>新感覚パーソナリティ診断。</span>
           </div>
 
           {/* 区切り線 */}

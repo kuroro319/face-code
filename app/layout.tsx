@@ -13,6 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL ?? 'https://face-code.vercel.app'
+  ),
   title: 'FACE CODE | 顔写真でわかるあなたの本当の性格',
   description:
     '人相学×AIで導き出す、新感覚パーソナリティ診断。あなたの顔が語る、本当の自分を発見しよう。',
