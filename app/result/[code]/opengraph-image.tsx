@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
 
+export const runtime = 'nodejs'
 export const alt = 'FACE CODE'
 export const size = {
   width: 1200,
@@ -56,13 +57,17 @@ export default async function Image({
   const tagline = typeInfo?.tagline ?? ''
 
   const baseUrl = getBaseUrl()
-  const characterSrc = `${baseUrl}/${encodeURIComponent(name)}.png`
+  const characterUrl = `${baseUrl}/${encodeURIComponent(name)}.png`
 
-  // 画像が取得できるか確認（失敗時は画像なしで描画）
-  let imageData: ArrayBuffer | null = null
+  // arrayBuffer → base64 data URL に変換して satori に渡す
+  let imageSrc: string | null = null
   try {
-    const res = await fetch(characterSrc)
-    if (res.ok) imageData = await res.arrayBuffer()
+    const res = await fetch(characterUrl)
+    if (res.ok) {
+      const buffer = await res.arrayBuffer()
+      const base64 = Buffer.from(buffer).toString('base64')
+      imageSrc = `data:image/png;base64,${base64}`
+    }
   } catch {
     // 画像取得失敗時はテキストのみで描画
   }
@@ -156,10 +161,10 @@ export default async function Image({
             height: '100%',
           }}
         >
-          {imageData ? (
+          {imageSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={characterSrc}
+              src={imageSrc}
               alt={name}
               style={{
                 width: '460px',

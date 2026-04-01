@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
 
+export const runtime = 'nodejs'
 export const alt = 'FACE CODE'
 export const size = {
   width: 1200,
@@ -17,10 +18,14 @@ export default async function Image() {
   const baseUrl = getBaseUrl()
   const characterSrc = `${baseUrl}/${encodeURIComponent('花形')}.png`
 
-  let imageData: ArrayBuffer | null = null
+  let imageSrc: string | null = null
   try {
     const res = await fetch(characterSrc)
-    if (res.ok) imageData = await res.arrayBuffer()
+    if (res.ok) {
+      const buffer = await res.arrayBuffer()
+      const base64 = Buffer.from(buffer).toString('base64')
+      imageSrc = `data:image/png;base64,${base64}`
+    }
   } catch {
     // 画像取得失敗時はテキストのみで描画
   }
@@ -114,10 +119,10 @@ export default async function Image() {
             height: '100%',
           }}
         >
-          {imageData ? (
+          {imageSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={characterSrc}
+              src={imageSrc}
               alt="花形タイプ"
               style={{
                 width: '440px',
