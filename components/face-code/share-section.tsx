@@ -2,7 +2,7 @@
 
 import { Check, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { FaXTwitter, FaInstagram } from "react-icons/fa6"
 import { SiLine } from "react-icons/si"
 
@@ -14,13 +14,9 @@ interface ShareSectionProps {
 export function ShareSection({ code, typeName }: ShareSectionProps) {
   const [copied, setCopied] = useState(false)
   const [generating, setGenerating] = useState(false)
-  const [shareUrl, setShareUrl] = useState("")
 
-  useEffect(() => {
-    setShareUrl(window.location.href)
-  }, [])
-
-  const shareText = `私のFACE CODEは「${code}」（${typeName}）でした！顔相性格診断であなたのタイプも調べてみてね`
+  const shareUrl = `https://face-code-xi.vercel.app/result/${code}`
+  const shareText = `私はFACE CODEで${typeName}タイプ（${code}）と診断されました！あなたも試してみて👇 #FACECODE #顔診断`
 
   const codeColors: Record<string, string> = {
     R: "#E8A0A0",
@@ -131,37 +127,39 @@ export function ShareSection({ code, typeName }: ShareSectionProps) {
         </Button>
 
         {/* Social Share Options */}
-        <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-3 flex-wrap">
           <Button
             variant="outline"
-            size="icon"
-            className="w-12 h-12 rounded-full border-[#1DA1F2]/30 hover:bg-[#1DA1F2]/10 hover:border-[#1DA1F2]"
+            className="rounded-full border-[#E8A0A0]/50 hover:bg-[#E8A0A0]/10 hover:border-[#E8A0A0] text-foreground/70 px-5 py-2 h-auto"
             onClick={handleTwitterShare}
           >
-            <FaXTwitter className="w-5 h-5 text-[#1DA1F2]" />
-            <span className="sr-only">Xでシェア</span>
+            <FaXTwitter className="w-4 h-4 mr-2 shrink-0" />
+            Xでシェア
           </Button>
           <Button
             variant="outline"
-            size="icon"
-            className="w-12 h-12 rounded-full border-[#00B900]/30 hover:bg-[#00B900]/10 hover:border-[#00B900]"
+            className="rounded-full border-[#E8A0A0]/50 hover:bg-[#E8A0A0]/10 hover:border-[#E8A0A0] text-foreground/70 px-5 py-2 h-auto"
             onClick={handleLineShare}
           >
-            <SiLine className="w-5 h-5 text-[#00B900]" />
-            <span className="sr-only">LINEでシェア</span>
+            <SiLine className="w-4 h-4 mr-2 shrink-0" />
+            LINEでシェア
           </Button>
           <Button
             variant="outline"
-            size="icon"
-            className="w-12 h-12 rounded-full border-foreground/20 hover:bg-foreground/5"
+            className="rounded-full border-[#E8A0A0]/50 hover:bg-[#E8A0A0]/10 hover:border-[#E8A0A0] text-foreground/70 px-5 py-2 h-auto"
             onClick={handleCopyLink}
           >
             {copied ? (
-              <Check className="w-5 h-5 text-green-500" />
+              <>
+                <Check className="w-4 h-4 mr-2 shrink-0 text-green-500" />
+                <span className="text-green-500">コピーしました！</span>
+              </>
             ) : (
-              <Link2 className="w-5 h-5 text-foreground/60" />
+              <>
+                <Link2 className="w-4 h-4 mr-2 shrink-0" />
+                リンクをコピー
+              </>
             )}
-            <span className="sr-only">リンクをコピー</span>
           </Button>
         </div>
       </div>
