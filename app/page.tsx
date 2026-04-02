@@ -15,7 +15,7 @@ export default function HomePage() {
       <main>
         <Hero />
         <Buzz />
-        <TypesGrid />
+        <div id="types"><TypesGrid /></div>
         <Features />
         <HowItWorks />
         <About />

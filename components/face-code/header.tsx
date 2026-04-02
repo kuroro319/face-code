@@ -23,19 +23,19 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           <Link
-            href="#"
+            href="/diagnose"
             className="text-sm text-foreground/70 hover:text-foreground transition-colors"
           >
             診断を受ける
           </Link>
           <Link
-            href="#"
+            href="/#types"
             className="text-sm text-foreground/70 hover:text-foreground transition-colors"
           >
             タイプ一覧
           </Link>
           <Link
-            href="#"
+            href="/faq"
             className="text-sm text-foreground/70 hover:text-foreground transition-colors"
           >
             FAQ
@@ -60,19 +60,19 @@ export function Header() {
           <SheetContent side="right" className="bg-[#FFF8F5]">
             <nav className="flex flex-col gap-6 mt-8">
               <Link
-                href="#"
+                href="/diagnose"
                 className="text-lg text-foreground/70 hover:text-foreground transition-colors"
               >
                 診断を受ける
               </Link>
               <Link
-                href="#"
+                href="/#types"
                 className="text-lg text-foreground/70 hover:text-foreground transition-colors"
               >
                 タイプ一覧
               </Link>
               <Link
-                href="#"
+                href="/faq"
                 className="text-lg text-foreground/70 hover:text-foreground transition-colors"
               >
                 FAQ
