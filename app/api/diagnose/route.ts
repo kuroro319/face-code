@@ -6,6 +6,20 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// IP別レート制限: { ip -> タイムスタンプ[] }
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT = 3;
+const WINDOW_MS = 60 * 60 * 1000; // 1時間
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = (rateLimitMap.get(ip) ?? []).filter(t => now - t < WINDOW_MS);
+  if (timestamps.length >= RATE_LIMIT) return false;
+  timestamps.push(now);
+  rateLimitMap.set(ip, timestamps);
+  return true;
+}
+
 const AXIS_VALID_VALUES = {
   F: ['R', 'A'] as const,
   A: ['L', 'G'] as const,
@@ -86,6 +100,14 @@ F は R か A、A は L か G、C は O か S、E は H か M のいずれかを
 - E のreason：鼻の形と高さ・眉の濃さ・黒目と白目の割合の3点すべてに言及すること`;
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+  if (!checkRateLimit(ip)) {
+    return Response.json(
+      { error: '診断は1時間に3回までご利用いただけます' },
+      { status: 429 },
+    );
+  }
+
   try {
     const { image } = await request.json();
 
