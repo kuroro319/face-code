@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from 'next/server'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const PRICE_IDS: Record<string, string> = {
-  light: process.env.STRIPE_PRICE_LIGHT!,
   full: process.env.STRIPE_PRICE_FULL!,
   subscription: process.env.STRIPE_PRICE_SUBSCRIPTION!,
 }
@@ -17,7 +16,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
   }
 
-  const origin = request.headers.get('origin') ?? ''
+  const origin = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://face-code.vercel.app'
 
   const session = await stripe.checkout.sessions.create({
     mode: plan === 'subscription' ? 'subscription' : 'payment',

@@ -2,6 +2,9 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { TYPE_NAMES } from '@/lib/face-types'
 
+// Claude API (max_tokens:8000) は 60〜120 秒かかる場合がある
+export const maxDuration = 120
+
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const ALL_TYPES = Object.entries(TYPE_NAMES)
@@ -15,16 +18,19 @@ function buildPrompt(code: string, typeName: string, plan: string, moleMeta?: st
 
 `
 
-  const compatibility = `## compatibility
+  const compatibilityDetail = `## compatibility
 16タイプそれぞれとの相性を以下の形式でJSON配列で出力してください（必ず全16タイプ分）。
 typeコードの一覧: ${ALL_TYPES}
-[{"code":"XXXX","name":"タイプ名","relation":"関係性の名前（例：最良の相棒）","desc":"一言説明（30字以内）"}]
-
-`
-
-  const love = `## love
-恋愛傾向の詳細を3〜4段落で記述してください。
-このタイプが恋愛でどう振る舞うか、好きなアプローチ、注意点、理想のパートナー像を含めてください。
+各タイプについて、${typeName}タイプとの関係性・付き合い方を具体的に分析してください。
+[{
+  "code": "XXXX",
+  "name": "タイプ名",
+  "relation": "関係性の名前（例：最良の相棒・ライバル・癒しの存在・要注意など）",
+  "score": 75,
+  "desc": "この2タイプの関係性の特徴（50字以内）",
+  "advice": "具体的な付き合い方・コツ（60字以内）"
+}]
+scoreは0〜100の相性度（数値のみ）。
 
 `
 
@@ -34,15 +40,19 @@ typeコードの一覧: ${ALL_TYPES}
 
 `
 
-  const hidden = `## hidden
-このタイプの「隠れた一面」を分析してください。
-表から見えない内面、意外な才能、ストレス時の変化、深く知った人だけが気づく側面を含めてください（3〜4段落）。
+  const fashion = `## fashion
+このタイプに似合うファッションスタイルの特徴を記述してください。
+このタイプの性格・雰囲気に合った以下の観点を含めてください（3〜4段落）：
+- 全体的なスタイル・テイスト（例：ナチュラル、モード、フェミニン、ストリートなど）
+- おすすめカラーパレット（似合う色と避けるべき色）
+- 取り入れたいアイテム・アクセサリー
+- 素材・シルエットのポイント
 
 `
 
-  const fortune = `## fortune
-このタイプの仕事運・財運を分析してください。
-向いている仕事スタイル、金銭感覚の特徴、富を引き寄せるコツ、注意点を含めてください（3〜4段落）。
+  const hidden = `## hidden
+このタイプの「隠れた一面」を分析してください。
+表から見えない内面、意外な才能、ストレス時の変化、深く知った人だけが気づく側面を含めてください（3〜4段落）。
 
 `
 
@@ -61,52 +71,80 @@ typeコードの一覧: ${ALL_TYPES}
 `
     : ''
 
-  const format = `---
+  // fullプラン: 隠れた一面 + メイク + ファッション + 相性詳細
+  const format_full = `---
 以下のJSON形式で回答してください（各値はマークダウン文字列）：
 {
   "compatibility": <上記のJSON配列>,
-  "love": "恋愛傾向テキスト",
   "makeup": "メイクアドバイステキスト",
+  "fashion": "ファッションアドバイステキスト",
   "hidden": "隠れた一面テキスト",
-  "fortune": "仕事運・財運テキスト",
+  "seasonal": null,
+  "mole": null
+}
+`
+
+  // subscriptionプラン: full + 季節メイク + ほくろ
+  const format_subscription = `---
+以下のJSON形式で回答してください（各値はマークダウン文字列）：
+{
+  "compatibility": <上記のJSON配列>,
+  "makeup": "メイクアドバイステキスト",
+  "fashion": "ファッションアドバイステキスト",
+  "hidden": "隠れた一面テキスト",
   "seasonal": "季節メイクテキスト",
   "mole": "ほくろ・シワ診断テキスト（入力がない場合はnull）"
 }
-planが"light"の場合はcompatibilityとloveのみ生成し、他はnullにしてください。
-planが"full"の場合はcompatibility/love/makeup/hidden/fortuneを生成し、seasonal/moleはnullにしてください。
-planが"subscription"の場合はmole入力があればmoleも、必ずseasonal含めすべて生成してください。`
+mole入力がない場合はmoleをnullにしてください。
+`
 
-  const sections = plan === 'light'
-    ? base + compatibility + love + format
-    : plan === 'full'
-      ? base + compatibility + love + makeup + hidden + fortune + format
-      : base + compatibility + love + makeup + hidden + fortune + seasonal + mole + format
-
-  return sections
+  if (plan === 'full') {
+    return base + compatibilityDetail + hidden + makeup + fashion + format_full
+  }
+  // subscription
+  return base + compatibilityDetail + hidden + makeup + fashion + seasonal + mole + format_subscription
 }
 
 export async function POST(request: NextRequest) {
-  const { code, plan, moleMeta } = await request.json()
+  let code: string, plan: string, moleMeta: string | undefined
+  try {
+    const body = await request.json()
+    code = body.code
+    plan = body.plan
+    moleMeta = body.moleMeta
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
 
   const typeName = TYPE_NAMES[code]
   if (!typeName) {
     return NextResponse.json({ error: 'Invalid code' }, { status: 400 })
   }
 
-  const prompt = buildPrompt(code, typeName, plan, moleMeta)
-
-  const response = await client.messages.create({
-    model: 'claude-opus-4-6',
-    max_tokens: 8000,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const text = response.content.find((b): b is Anthropic.TextBlock => b.type === 'text')?.text ?? ''
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    return NextResponse.json({ error: 'Failed to parse content' }, { status: 500 })
+  // fullとsubscriptionのみ対応（loveとfortuneは/api/free-contentで提供）
+  if (plan !== 'full' && plan !== 'subscription') {
+    return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
   }
 
-  const content = JSON.parse(jsonMatch[0])
-  return NextResponse.json(content)
+  try {
+    const prompt = buildPrompt(code, typeName, plan, moleMeta)
+
+    const response = await client.messages.create({
+      model: 'claude-opus-4-6',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const text = response.content.find((b): b is Anthropic.TextBlock => b.type === 'text')?.text ?? ''
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      return NextResponse.json({ error: 'Failed to parse content' }, { status: 500 })
+    }
+
+    const content = JSON.parse(jsonMatch[0])
+    return NextResponse.json(content)
+  } catch (err) {
+    console.error('[content] error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

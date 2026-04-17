@@ -10,13 +10,10 @@ import type { Plan } from '@/lib/face-types'
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export default async function SuccessPage({
-  params,
   searchParams,
 }: {
-  params: Promise<{ code: string }>
   searchParams: Promise<{ session_id?: string }>
 }) {
-  const { code } = await params
   const { session_id } = await searchParams
 
   if (!session_id) notFound()
@@ -26,10 +23,13 @@ export default async function SuccessPage({
     notFound()
   }
 
-  const plan = (session.metadata?.plan ?? 'light') as Plan
+  // URLのcodeではなくStripeセッションのmetadataを信頼する
+  const code = session.metadata?.face_code
+  if (!code) notFound()
+
+  const plan = (session.metadata?.plan ?? 'full') as Plan
 
   const PLAN_LABELS: Record<Plan, string> = {
-    light: 'ライトプラン',
     full: 'フルプラン',
     subscription: '継続プラン',
   }

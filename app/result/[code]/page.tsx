@@ -8,6 +8,8 @@ import { CommunityCommentsSection } from '@/components/face-code/community-comme
 import { UpgradeCta } from '@/components/face-code/upgrade-cta'
 import { ShareSection } from '@/components/face-code/share-section'
 import { Footer } from '@/components/face-code/footer'
+import CompatibilitySection from '@/components/result/CompatibilitySection'
+import { FreeGeneratedContent } from '@/components/face-code/free-generated-content'
 
 // ── 型データ ──────────────────────────────────────────────────────────────
 interface TypeInfo {
@@ -248,7 +250,15 @@ export default async function ResultPage({
 
       <FamousExamplesSection celebrities={celebrities} />
 
-      <CommunityCommentsSection typeName={typeInfo.name} />
+      {/* 無料コンテンツ: 相性一覧 */}
+      <section className="py-8">
+        <CompatibilitySection typeCode={normalizedCode} />
+      </section>
+
+      {/* 無料コンテンツ: 恋愛傾向 + 仕事運・財産運（Claude生成・キャッシュ付き） */}
+      <FreeGeneratedContent code={normalizedCode} />
+
+      <CommunityCommentsSection typeName={typeInfo.name} typeCode={normalizedCode} />
 
       <UpgradeCta code={normalizedCode} />
 

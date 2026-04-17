@@ -7,11 +7,11 @@ export const metadata = {
 }
 
 const rows: { label: string; value: string }[] = [
-  { label: "販売業者", value: "[運営者名]" },
-  { label: "代表者名", value: "[代表者名]" },
-  { label: "所在地", value: "[所在地]（請求があれば遅滞なく開示します）" },
+  { label: "販売業者", value: "マイクロ" },
+  { label: "代表者名", value: "マイクロ" },
+  { label: "所在地", value: "〒170-0013 東京都豊島区東池袋2丁目62番地8号BIGオフィスプラザ池袋1206" },
   { label: "電話番号", value: "請求があれば遅滞なく開示します" },
-  { label: "メールアドレス", value: "[メールアドレス]" },
+  { label: "メールアドレス", value: "facecode48@gmail.com" },
   { label: "販売URL", value: "https://face-code.vercel.app（またはご利用のURL）" },
   { label: "販売価格", value: "以下のプランをご参照ください" },
   { label: "商品代金以外の必要料金", value: "なし（通信料・接続料はお客様負担）" },

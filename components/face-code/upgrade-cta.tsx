@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, Users, Sparkles, Eye, ChevronRight, Check, Lock, CreditCard, RefreshCw, Flower2, Moon } from "lucide-react"
+import { Sparkles, Eye, ChevronRight, Check, Lock, CreditCard, Flower2, Moon, Shirt, GitCompare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-type PlanType = "light" | "full" | "subscription"
+type PlanType = "full" | "subscription"
 
 interface UpgradeCtaProps {
   code: string
@@ -15,32 +15,18 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
   const [loading, setLoading] = useState(false)
 
   const plans = {
-    light: {
-      name: "ライト",
-      price: "¥200",
-      priceNote: "1回限り",
-      features: [
-        { icon: Users, label: "16タイプとの相性一覧", included: true },
-        { icon: Heart, label: "恋愛傾向の詳細", included: true },
-        { icon: Sparkles, label: "メイクアドバイス", included: false },
-        { icon: Eye, label: "隠れた一面の分析", included: false },
-        { icon: RefreshCw, label: "仕事運・財運", included: false },
-        { icon: Flower2, label: "ほくろ・シワ詳細診断", included: false },
-        { icon: Moon, label: "季節メイク・月1再診断", included: false },
-      ]
-    },
     full: {
       name: "フル",
       price: "¥580",
       priceNote: "1回限り",
       features: [
-        { icon: Users, label: "16タイプとの相性一覧", included: true },
-        { icon: Heart, label: "恋愛傾向の詳細", included: true },
-        { icon: Sparkles, label: "メイクアドバイス", included: true },
         { icon: Eye, label: "隠れた一面の分析", included: true },
-        { icon: RefreshCw, label: "仕事運・財運", included: true },
+        { icon: Sparkles, label: "メイクアドバイス", included: true },
+        { icon: Shirt, label: "ファッションアドバイス", included: true },
+        { icon: Sparkles, label: "相性詳細版（16タイプ全分析）", included: true },
         { icon: Flower2, label: "ほくろ・シワ詳細診断", included: false },
-        { icon: Moon, label: "季節メイク・月1再診断", included: false },
+        { icon: GitCompare, label: "過去の診断との比較", included: false },
+        { icon: Moon, label: "季節メイクアドバイス更新", included: false },
       ]
     },
     subscription: {
@@ -48,13 +34,13 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
       price: "¥880",
       priceNote: "/月",
       features: [
-        { icon: Users, label: "16タイプとの相性一覧", included: true },
-        { icon: Heart, label: "恋愛傾向の詳細", included: true },
-        { icon: Sparkles, label: "メイクアドバイス", included: true },
         { icon: Eye, label: "隠れた一面の分析", included: true },
-        { icon: RefreshCw, label: "仕事運・財運", included: true },
+        { icon: Sparkles, label: "メイクアドバイス", included: true },
+        { icon: Shirt, label: "ファッションアドバイス", included: true },
+        { icon: Sparkles, label: "相性詳細版（16タイプ全分析）", included: true },
         { icon: Flower2, label: "ほくろ・シワ詳細診断", included: true },
-        { icon: Moon, label: "季節メイク・月1再診断", included: true },
+        { icon: GitCompare, label: "過去の診断との比較", included: true },
+        { icon: Moon, label: "季節メイクアドバイス更新", included: true },
       ]
     }
   }
@@ -93,24 +79,24 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
               </div>
             </div>
             <div className="blur-sm select-none" aria-hidden="true">
-              <h3 className="font-serif text-lg font-semibold mb-3 text-foreground/80">恋愛傾向</h3>
+              <h3 className="font-serif text-lg font-semibold mb-3 text-foreground/80">隠れた一面の分析</h3>
               <p className="text-foreground/60 text-sm leading-relaxed mb-4">
-                あなたは恋愛において情熱的で、一度好きになると一途に愛を注ぐタイプです。
-                ドラマチックな展開を好み、サプライズや特別な演出で相手を喜ばせたいと考えます...
+                表には見せない内面には、驚くべき才能が隠されています。ストレスがかかると
+                普段とはまったく違う一面が現れ、深く付き合った人だけが気づく秘密があります...
               </p>
-              <h3 className="font-serif text-lg font-semibold mb-3 text-foreground/80">相性ランキング</h3>
+              <h3 className="font-serif text-lg font-semibold mb-3 text-foreground/80">ファッションアドバイス</h3>
               <div className="flex gap-2">
-                <span className="px-3 py-1 bg-[#E8A0A0]/10 rounded-full text-sm">1位: SLKH</span>
-                <span className="px-3 py-1 bg-[#7EB8C9]/10 rounded-full text-sm">2位: RMOH</span>
-                <span className="px-3 py-1 bg-[#A889BD]/10 rounded-full text-sm">3位: RLKF</span>
+                <span className="px-3 py-1 bg-[#E8A0A0]/10 rounded-full text-sm">スタイル</span>
+                <span className="px-3 py-1 bg-[#7EB8C9]/10 rounded-full text-sm">カラー</span>
+                <span className="px-3 py-1 bg-[#A889BD]/10 rounded-full text-sm">アイテム</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          {(["light", "full", "subscription"] as PlanType[]).map((planKey) => {
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          {(["full", "subscription"] as PlanType[]).map((planKey) => {
             const plan = plans[planKey]
             const isSelected = selectedPlan === planKey
             return (

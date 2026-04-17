@@ -5,4 +5,4 @@ export const TYPE_NAMES: Record<string, string> = {
   AGOH: '哲学者', AGOM: '研究者', AGSH: '予言者', AGSM: '賢者',
 }
 
-export type Plan = 'light' | 'full' | 'subscription'
+export type Plan = 'full' | 'subscription'

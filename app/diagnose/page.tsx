@@ -39,6 +39,29 @@ const HIGHLIGHTS: Record<FaceKey, { cx: number; cy: number; rx: number; ry: numb
   ],
 };
 
+// 顔写真をパーソナルメイク分析用に圧縮してlocalStorageに保存
+async function saveCompressedImage(dataUrl: string, code: string): Promise<void> {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1024;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      try {
+        localStorage.setItem(`face_code_img_${code}`, canvas.toDataURL('image/jpeg', 0.82));
+      } catch {
+        // localStorage が満杯の場合は無視
+      }
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = dataUrl;
+  });
+}
+
 export default function DiagnosePage() {
   const [image, setImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -77,6 +100,14 @@ export default function DiagnosePage() {
       if (data.reasons) {
         sessionStorage.setItem('faceCodeReasons', JSON.stringify(data.reasons));
       }
+      // 診断履歴を localStorage に保存（過去の診断との比較用）
+      try {
+        const history = JSON.parse(localStorage.getItem('face_code_history') ?? '[]')
+        history.push({ code: data.code, date: new Date().toLocaleDateString('ja-JP') })
+        localStorage.setItem('face_code_history', JSON.stringify(history.slice(-20)))
+      } catch { /* ignore */ }
+      // 顔写真を継続プランのパーソナルメイク分析用に圧縮保存
+      await saveCompressedImage(image, data.code);
       router.push(`/result/${data.code}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : '診断中にエラーが発生しました');

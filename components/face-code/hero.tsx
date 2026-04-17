@@ -67,7 +67,7 @@ export async function Hero() {
 
         <div className="flex-shrink-0" style={{ position: "relative" }}>
           <div className="overflow-hidden border-4 border-secondary shadow-2xl" style={{ position: "relative", width: "18rem", height: "18rem", borderRadius: "9999px" }}>
-            <Image src="/花形.png" alt="FACE CODE 花形タイプ" fill className="object-cover object-top" priority />
+            <Image src="/花形.png" alt="FACE CODE 花形タイプ" fill className="object-cover object-top" loading="eager" sizes="18rem" />
           </div>
           <div className="bg-card border border-border rounded-2xl px-4 py-2 shadow-lg text-sm font-bold text-primary" style={{ position: "absolute", bottom: "-0.5rem", left: "-1rem" }}>
             🌸 16タイプ診断
