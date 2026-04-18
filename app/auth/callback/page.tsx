@@ -1,10 +1,20 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { Suspense, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { getSupabaseBrowser } from "@/lib/supabase-client"
 
-export default function AuthCallbackPage() {
+const Spinner = () => (
+  <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#FFF8F5" }}>
+    <div style={{ textAlign: "center" }}>
+      <div style={{ width: "40px", height: "40px", borderRadius: "50%", border: "3px solid #E8A0A0", borderTopColor: "transparent", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
+      <p style={{ color: "#aaa", fontSize: "14px" }}>ログイン処理中…</p>
+    </div>
+    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+  </div>
+)
+
+function AuthCallbackInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const done = useRef(false)
@@ -26,13 +36,13 @@ export default function AuthCallbackPage() {
     }
   }, [router, searchParams])
 
+  return <Spinner />
+}
+
+export default function AuthCallbackPage() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#FFF8F5" }}>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ width: "40px", height: "40px", borderRadius: "50%", border: "3px solid #E8A0A0", borderTopColor: "transparent", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
-        <p style={{ color: "#aaa", fontSize: "14px" }}>ログイン処理中…</p>
-      </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
+    <Suspense fallback={<Spinner />}>
+      <AuthCallbackInner />
+    </Suspense>
   )
 }
