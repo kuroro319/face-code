@@ -28,21 +28,15 @@ const rows: { label: string; value: string }[] = [
 
 const plans = [
   {
-    name: "ライト",
-    price: "¥200",
-    desc: "相性一覧・恋愛傾向の詳細",
-    type: "買い切り",
-  },
-  {
     name: "フル",
-    price: "¥580",  // ← 修正
-    desc: "ライト内容＋メイク・隠れた一面・仕事運財運",
+    price: "¥580",
+    desc: "隠れた一面の分析・メイク・ファッション・相性詳細版（16タイプ全分析）",
     type: "買い切り",
   },
   {
     name: "継続",
-    price: "¥880 / 月",  // ← 修正
-    desc: "フル内容＋ほくろシワ詳細・季節メイク・月1再診断",
+    price: "¥880 / 月",
+    desc: "フル内容＋パーソナルメイク・ほくろシワ詳細・季節メイク・月1再診断",
     type: "月額継続",
   },
 ]
@@ -130,7 +124,7 @@ export default function TokuteiPage() {
                     >
                       {row.label === "販売価格" ? (
                         <span>
-                          ¥200（ライト） / ¥580（フル） / ¥880/月（継続）{/* ← 修正 */}
+                          ¥580（フル・買い切り） / ¥880/月（継続）
                           <br />
                           <span className="text-xs" style={{ color: "#888" }}>※ 表示価格はすべて税込です</span>
                         </span>

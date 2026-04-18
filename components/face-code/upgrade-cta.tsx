@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Sparkles, Eye, ChevronRight, Check, Lock, CreditCard, Flower2, Moon, Shirt, GitCompare } from "lucide-react"
+import { Sparkles, Eye, ChevronRight, Check, Lock, CreditCard, Flower2, Moon, Shirt, GitCompare, Camera, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 type PlanType = "full" | "subscription"
@@ -37,10 +37,11 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
         { icon: Eye, label: "隠れた一面の分析", included: true },
         { icon: Sparkles, label: "メイクアドバイス", included: true },
         { icon: Shirt, label: "ファッションアドバイス", included: true },
-        { icon: Sparkles, label: "相性詳細版（16タイプ全分析）", included: true },
+        { icon: GitCompare, label: "相性詳細版（16タイプ全分析）", included: true },
+        { icon: Camera, label: "パーソナルメイクアドバイス（顔写真分析）", included: true },
         { icon: Flower2, label: "ほくろ・シワ詳細診断", included: true },
-        { icon: GitCompare, label: "過去の診断との比較", included: true },
         { icon: Moon, label: "季節メイクアドバイス更新", included: true },
+        { icon: RefreshCw, label: "月1再診断", included: true },
       ]
     }
   }
