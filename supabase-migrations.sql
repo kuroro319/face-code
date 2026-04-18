@@ -65,3 +65,34 @@ CREATE POLICY "likes_delete" ON comment_likes FOR DELETE USING (auth.uid() = use
 -- free_content をクリアすると次回アクセス時に Claude が再生成します
 -- ============================================================
 -- TRUNCATE TABLE free_content;
+
+-- ============================================================
+-- 6. ユーザープロフィール（国・タイプコード）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS profiles (
+  user_id    UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  country    TEXT,
+  type_code  VARCHAR(4),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- 7. 国別タイプ統計ビュー（service_role から参照）
+-- ============================================================
+CREATE OR REPLACE VIEW country_type_stats AS
+SELECT
+  country,
+  type_code,
+  COUNT(*) AS cnt
+FROM profiles
+WHERE country IS NOT NULL
+  AND type_code IS NOT NULL
+GROUP BY country, type_code
+ORDER BY country, cnt DESC;

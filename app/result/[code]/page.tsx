@@ -10,6 +10,8 @@ import { ShareSection } from '@/components/face-code/share-section'
 import { Footer } from '@/components/face-code/footer'
 import CompatibilitySection from '@/components/result/CompatibilitySection'
 import { FreeGeneratedContent } from '@/components/face-code/free-generated-content'
+import { CountrySetup } from '@/components/face-code/country-setup'
+import { CountryStatsSection } from '@/components/face-code/country-stats-section'
 
 // ── 型データ ──────────────────────────────────────────────────────────────
 interface TypeInfo {
@@ -258,6 +260,9 @@ export default async function ResultPage({
       {/* 無料コンテンツ: 恋愛傾向 + 仕事運・財産運（Claude生成・キャッシュ付き） */}
       <FreeGeneratedContent code={normalizedCode} />
 
+      {/* 国別統計 */}
+      <CountryStatsSection currentTypeCode={normalizedCode} />
+
       <CommunityCommentsSection typeName={typeInfo.name} typeCode={normalizedCode} />
 
       <UpgradeCta code={normalizedCode} />
@@ -268,6 +273,9 @@ export default async function ResultPage({
       />
 
       <Footer />
+
+      {/* 国選択モーダル（ログイン済み・未設定の場合のみ表示） */}
+      <CountrySetup typeCode={normalizedCode} />
     </main>
   )
 }
