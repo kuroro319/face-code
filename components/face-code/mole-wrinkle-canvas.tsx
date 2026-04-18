@@ -16,7 +16,15 @@ interface Props {
 const CW = 280
 const CH = 360
 
+// 高優先度ゾーン（個別解釈対象）を先頭に置くことで優先マッチさせる
 const ZONES = [
+  // ── 個別解釈ゾーン（高優先度） ──────────────────────────────
+  { name: "眉間",           x1: 122, y1: 115, x2: 158, y2: 155 },
+  { name: "左目尻",         x1: 54,  y1: 148, x2: 90,  y2: 192 },
+  { name: "右目尻",         x1: 190, y1: 148, x2: 226, y2: 192 },
+  { name: "左マリオネット", x1: 36,  y1: 256, x2: 113, y2: 296 },
+  { name: "右マリオネット", x1: 167, y1: 256, x2: 244, y2: 296 },
+  // ── 通常ゾーン ──────────────────────────────────────────────
   { name: "額（左）",   x1: 38,  y1: 52,  x2: 113, y2: 126 },
   { name: "額（中央）", x1: 113, y1: 42,  x2: 167, y2: 126 },
   { name: "額（右）",   x1: 167, y1: 52,  x2: 242, y2: 126 },
@@ -43,15 +51,70 @@ function getZone(x: number, y: number): string {
   return "右側"
 }
 
-function getWrinkleDesc(pts: Array<{ x: number; y: number }>): string {
-  if (pts.length < 2) return "不明"
-  const mx = (pts[0].x + pts[pts.length - 1].x) / 2
-  const my = (pts[0].y + pts[pts.length - 1].y) / 2
-  const zone = getZone(mx, my)
+// ── シワ解釈ルール ────────────────────────────────────────────
+// 個別解釈（1本ずつ意味が異なる）
+const INDIVIDUAL_ZONES = new Set([
+  "眉間", "鼻", "人中", "上唇", "下唇・口元",
+  "左マリオネット", "右マリオネット",
+])
+
+// グループ解釈（まとめて1解釈）- value がグループラベル
+const GROUP_MAP: Record<string, string> = {
+  "左目尻": "目尻", "右目尻": "目尻",
+  "額（左）": "額", "額（中央）": "額", "額（右）": "額",
+  "左頬": "頬",  "右頬": "頬",
+  "首": "首",
+}
+
+// ほくろ位置ラベルの見やすい表記
+const ZONE_DISPLAY: Record<string, string> = {
+  "左マリオネット": "左口角（マリオネットライン）",
+  "右マリオネット": "右口角（マリオネットライン）",
+}
+
+function wrinkleDir(pts: Array<{ x: number; y: number }>): string {
+  if (pts.length < 2) return "横向き"
   const dx = Math.abs(pts[pts.length - 1].x - pts[0].x)
   const dy = Math.abs(pts[pts.length - 1].y - pts[0].y)
-  const dir = dx > dy * 2 ? "横向き" : dy > dx * 2 ? "縦向き" : "斜め"
-  return `${zone}の${dir}のシワ`
+  return dx > dy * 2 ? "横向き" : dy > dx * 2 ? "縦向き" : "斜め"
+}
+
+// 送信用にグルーピング処理したシワ文字列の配列を生成
+function groupWrinklesForSubmit(wrinkles: WrinklePath[]): string[] {
+  const individual: string[] = []
+  const groupedMap = new Map<string, { subZones: string[]; count: number }>()
+
+  for (const w of wrinkles) {
+    if (w.points.length < 2) continue
+    const mx = (w.points[0].x + w.points[w.points.length - 1].x) / 2
+    const my = (w.points[0].y + w.points[w.points.length - 1].y) / 2
+    const zone = getZone(mx, my)
+    const dir = wrinkleDir(w.points)
+
+    if (INDIVIDUAL_ZONES.has(zone)) {
+      const label = ZONE_DISPLAY[zone] ?? zone
+      individual.push(`${label}の${dir}のシワ`)
+    } else if (GROUP_MAP[zone]) {
+      const groupLabel = GROUP_MAP[zone]
+      if (!groupedMap.has(groupLabel)) {
+        groupedMap.set(groupLabel, { subZones: [], count: 0 })
+      }
+      const g = groupedMap.get(groupLabel)!
+      g.count++
+      if (!g.subZones.includes(zone)) g.subZones.push(zone)
+    } else {
+      // 未分類は個別扱い
+      individual.push(`${zone}の${dir}のシワ`)
+    }
+  }
+
+  const grouped: string[] = []
+  for (const [label, g] of groupedMap) {
+    const detail = g.subZones.length > 1 ? `（${g.subZones.join('・')}に分布）` : ''
+    grouped.push(`${label}に${g.count}本のシワ${detail}`)
+  }
+
+  return [...individual, ...grouped]
 }
 
 function drawFace(ctx: CanvasRenderingContext2D) {
@@ -299,7 +362,7 @@ export function MoleWrinkleCanvas({ code, onResult }: Props) {
         body: JSON.stringify({
           code,
           moles: moles.map(m => getZone(m.x, m.y)),
-          wrinkles: wrinkles.map(w => getWrinkleDesc(w.points)),
+          wrinkles: groupWrinklesForSubmit(wrinkles),
         }),
       })
       if (!res.ok) throw new Error()
