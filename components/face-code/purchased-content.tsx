@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { Sparkles, Eye, Flower2, Moon, ChevronRight, ChevronDown, Shirt, GitCompare, Camera } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Sparkles, Eye, Flower2, Moon, ChevronDown, Shirt, GitCompare, Camera } from "lucide-react"
 import type { Plan } from "@/lib/face-types"
+import { MoleWrinkleCanvas, type DiagnosisResult } from "@/components/face-code/mole-wrinkle-canvas"
 
 // ─── タイプ別カラー定義 ──────────────────────────────────────
 const MAKEUP_COLORS: Record<string, Array<{ color: string; label: string }>> = {
@@ -487,37 +487,6 @@ function PersonalizedMakeupSection({ code }: { code: string }) {
   )
 }
 
-// ─── ほくろフォーム ──────────────────────────────────────────
-function MoleForm({ code, plan, onResult }: { code: string; plan: Plan; onResult: (t: string) => void }) {
-  const [molePosition, setMolePosition] = useState("")
-  const [wrinkleType, setWrinkleType] = useState("")
-  const [loading, setLoading] = useState(false)
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!molePosition && !wrinkleType) return
-    setLoading(true)
-    const moleMeta = [molePosition && `ほくろの位置: ${molePosition}`, wrinkleType && `シワの種類・位置: ${wrinkleType}`].filter(Boolean).join("、")
-    const res = await fetch("/api/content", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, plan, moleMeta }) })
-    const data = await res.json()
-    if (data.mole) onResult(data.mole)
-    setLoading(false)
-  }
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm text-foreground/70 mb-1">ほくろの位置（例：右頬、鼻の下）</label>
-        <input type="text" value={molePosition} onChange={e => setMolePosition(e.target.value)} placeholder="気になるほくろの位置を入力" className="w-full px-4 py-2 rounded-xl border border-foreground/10 text-sm bg-[#FFF8F5] focus:outline-none focus:border-[#E8A0A0]" />
-      </div>
-      <div>
-        <label className="block text-sm text-foreground/70 mb-1">シワの種類・位置（例：目尻のシワ、額の横ジワ）</label>
-        <input type="text" value={wrinkleType} onChange={e => setWrinkleType(e.target.value)} placeholder="気になるシワを入力" className="w-full px-4 py-2 rounded-xl border border-foreground/10 text-sm bg-[#FFF8F5] focus:outline-none focus:border-[#E8A0A0]" />
-      </div>
-      <Button type="submit" disabled={loading || (!molePosition && !wrinkleType)} className="w-full bg-gradient-to-r from-[#E8A0A0] to-[#D4847B] text-white rounded-full border-0">
-        {loading ? "診断中..." : "診断する"}{!loading && <ChevronRight className="w-4 h-4 ml-1" />}
-      </Button>
-    </form>
-  )
-}
 
 // ─── メインコンポーネント ────────────────────────────────────
 export function PurchasedContent({ code, plan }: Props) {
@@ -525,7 +494,7 @@ export function PurchasedContent({ code, plan }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
-  const [moleResult, setMoleResult] = useState<string | null>(null)
+  const [moleResult, setMoleResult] = useState<DiagnosisResult[] | null>(null)
 
   useEffect(() => {
     setLoading(true); setError(false)
@@ -598,8 +567,30 @@ export function PurchasedContent({ code, plan }: Props) {
       {plan === "subscription" && (
         <Section icon={Flower2} title="ほくろ・シワ詳細診断" accentColor="#D4A0A0">
           {moleResult
-            ? <ExpandableText text={stripMd(moleResult)} previewChars={100} />
-            : <MoleForm code={code} plan={plan} onResult={setMoleResult} />}
+            ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {moleResult.map((r, i) => (
+                  <div key={i} style={{
+                    backgroundColor: r.type === "mole" ? "#FFF8F5" : "#FFF5F0",
+                    borderRadius: "12px", padding: "14px 16px",
+                    borderLeft: `3px solid ${r.type === "mole" ? "#2A1008" : "#8B6050"}`,
+                  }}>
+                    <p style={{ margin: "0 0 6px", fontSize: "12px", fontWeight: 700, color: r.type === "mole" ? "#2A1008" : "#8B6050" }}>
+                      {r.type === "mole" ? "●" : "〜"} {r.location}
+                    </p>
+                    <p style={{ margin: 0, fontSize: "13px", color: "#555", lineHeight: 1.8 }}>{r.advice}</p>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setMoleResult(null)}
+                  style={{ marginTop: "4px", fontSize: "12px", color: "#C9546E", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                >
+                  もう一度診断する
+                </button>
+              </div>
+            )
+            : <MoleWrinkleCanvas code={code} onResult={setMoleResult} />
+          }
         </Section>
       )}
 

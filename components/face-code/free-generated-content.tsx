@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Heart, TrendingUp, ChevronDown } from "lucide-react"
+import { Heart, TrendingUp } from "lucide-react"
 
 interface FreeContent {
   love: string
@@ -20,20 +20,12 @@ function parseBlocks(text: string): string[] {
   return text.split(/\n{2,}/).map(b => stripMd(b)).filter(Boolean)
 }
 
-function ExpandableText({ text, previewChars = 80 }: { text: string; previewChars?: number }) {
-  const [open, setOpen] = useState(false)
-  const isLong = text.length > previewChars
+function ExpandableText({ text }: { text: string; previewChars?: number }) {
   return (
     <div>
       <p style={{ margin: 0, fontSize: "14px", color: "#555", lineHeight: 1.8 }}>
-        {open || !isLong ? text : text.slice(0, previewChars) + "…"}
+        {text}
       </p>
-      {isLong && (
-        <button onClick={() => setOpen(!open)}
-          style={{ marginTop: "6px", fontSize: "12px", color: "#C9546E", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-          {open ? "閉じる ▲" : "続きを読む ▼"}
-        </button>
-      )}
     </div>
   )
 }
@@ -63,7 +55,7 @@ function LoveSection({ text }: { text: string }) {
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       <div style={{ backgroundColor: "#FFF0F4", borderRadius: "12px", padding: "14px 16px", borderLeft: "3px solid #E8A0A0" }}>
         <p style={{ margin: 0, fontSize: "14px", color: "#333", lineHeight: 1.8, fontWeight: 500 }}>
-          {lead.slice(0, 100)}{lead.length > 100 ? "…" : ""}
+          {lead}
         </p>
       </div>
       {rest.slice(0, 4).map((para, i) => (

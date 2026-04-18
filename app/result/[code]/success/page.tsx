@@ -18,10 +18,22 @@ export default async function SuccessPage({
 
   if (!session_id) notFound()
 
-  const session = await stripe.checkout.sessions.retrieve(session_id)
-  if (session.status !== 'complete') {
+  let session: Stripe.Checkout.Session
+  try {
+    session = await stripe.checkout.sessions.retrieve(session_id)
+  } catch (err) {
+    console.error('[success] stripe.retrieve error:', err)
     notFound()
   }
+
+  // サブスクリプションはStripe側の反映に数秒かかる場合があるためリトライ
+  let retries = 0
+  while (session.status !== 'complete' && retries < 6) {
+    await new Promise(r => setTimeout(r, 1500))
+    session = await stripe.checkout.sessions.retrieve(session_id)
+    retries++
+  }
+  if (session.status !== 'complete') notFound()
 
   // URLのcodeではなくStripeセッションのmetadataを信頼する
   const code = session.metadata?.face_code
