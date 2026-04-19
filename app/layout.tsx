@@ -12,23 +12,51 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://face-code-xi.vercel.app';
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL ?? 'https://face-code-xi.vercel.app'
-  ),
-  title: 'FACE CODE | 顔写真でわかるあなたの本当の性格',
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: 'FACE CODE｜顔写真でわかるあなたの本当の性格',
+    template: '%s | FACE CODE',
+  },
   description:
-    '人相学×AIで導き出す、新感覚パーソナリティ診断。あなたの顔が語る、本当の自分を発見しよう。',
+    'AIが顔写真を分析して16タイプの性格を診断。メイク・ファッション・恋愛傾向・仕事運まで。無料で今すぐ診断できます。',
+  keywords: ['顔診断', '性格診断', '人相学', 'AI診断', 'パーソナリティ', 'FACE CODE'],
+  authors: [{ name: 'FACE CODE' }],
   openGraph: {
-    title: 'FACE CODE | 顔写真でわかるあなたの本当の性格',
+    type: 'website',
+    locale: 'ja_JP',
+    url: BASE_URL,
+    siteName: 'FACE CODE',
+    title: 'FACE CODE｜顔写真でわかるあなたの本当の性格',
     description:
-      '人相学×AIで導き出す、新感覚パーソナリティ診断。あなたの顔が語る、本当の自分を発見しよう。',
+      'AIが顔写真を分析して16タイプの性格を診断。メイク・ファッション・恋愛傾向・仕事運まで。無料で今すぐ診断できます。',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'FACE CODE - 顔写真でわかるあなたの本当の性格',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FACE CODE | 顔写真でわかるあなたの本当の性格',
+    title: 'FACE CODE｜顔写真でわかるあなたの本当の性格',
     description:
-      '人相学×AIで導き出す、新感覚パーソナリティ診断。あなたの顔が語る、本当の自分を発見しよう。',
+      'AIが顔写真を分析して16タイプの性格を診断。メイク・ファッション・恋愛傾向・仕事運まで。無料で今すぐ診断できます。',
+    images: ['/opengraph-image'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
@@ -39,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
