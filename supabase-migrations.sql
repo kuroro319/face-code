@@ -96,3 +96,31 @@ WHERE country IS NOT NULL
   AND type_code IS NOT NULL
 GROUP BY country, type_code
 ORDER BY country, cnt DESC;
+
+-- ============================================================
+-- 8. purchases テーブル（Stripe Webhook で書き込み、service_role のみ操作）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS purchases (
+  id                 UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  stripe_session_id  TEXT UNIQUE NOT NULL,
+  face_code          TEXT NOT NULL,
+  plan               TEXT NOT NULL,
+  stripe_customer_id TEXT,
+  created_at         TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS 有効化：service_role は RLS をバイパスするため Webhook は引き続き動作する
+-- anon / authenticated からの直接アクセスはすべて拒否（ポリシーなし = 全拒否）
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================
+-- 9. diagnoses テーブル（診断ログ、service_role のみ書き込み）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS diagnoses (
+  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  type_code  VARCHAR(4),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS 有効化：ポリシーなし = anon / authenticated からの全操作を拒否
+ALTER TABLE diagnoses ENABLE ROW LEVEL SECURITY;
