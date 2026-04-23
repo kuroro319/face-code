@@ -13,6 +13,7 @@ interface UpgradeCtaProps {
 export function UpgradeCta({ code }: UpgradeCtaProps) {
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("full")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const plans = {
     full: {
@@ -21,7 +22,7 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
       priceNote: "1回限り",
       features: [
         { icon: Eye, label: "隠れた一面の分析", included: true },
-        { icon: Sparkles, label: "メイクアドバイス", included: true },
+        { icon: Sparkles, label: "メイクアドバイス（タイプ別）", included: true },
         { icon: Shirt, label: "ファッションアドバイス", included: true },
         { icon: Sparkles, label: "相性詳細版（16タイプ全分析）", included: true },
         { icon: Flower2, label: "ほくろ・シワ詳細診断", included: false },
@@ -38,7 +39,7 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
         { icon: Sparkles, label: "メイクアドバイス", included: true },
         { icon: Shirt, label: "ファッションアドバイス", included: true },
         { icon: GitCompare, label: "相性詳細版（16タイプ全分析）", included: true },
-        { icon: Camera, label: "パーソナルメイクアドバイス（顔写真分析）", included: true },
+        { icon: Camera, label: "パーソナルメイクアドバイス（顔写真から個別分析）", included: true },
         { icon: Flower2, label: "ほくろ・シワ詳細診断", included: true },
         { icon: Moon, label: "季節メイクアドバイス更新", included: true },
         { icon: RefreshCw, label: "月1再診断", included: true },
@@ -48,6 +49,7 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
 
   const handlePurchase = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
@@ -57,7 +59,11 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
       const data = await res.json()
       if (data.url) {
         window.location.href = data.url
+      } else {
+        setError(data.error ?? '決済ページへの接続に失敗しました。時間をおいて再度お試しください。')
       }
+    } catch {
+      setError('ネットワークエラーが発生しました。時間をおいて再度お試しください。')
     } finally {
       setLoading(false)
     }
@@ -158,6 +164,10 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
               購入後すぐに詳細レポートが閲覧できます
             </p>
           </div>
+
+          {error && (
+            <p className="text-red-400 text-sm text-center mb-4">{error}</p>
+          )}
 
           <Button
             size="lg"

@@ -190,6 +190,7 @@ export default function DiagnosePage() {
               <li>✓ 明るい場所で撮影する</li>
               <li>✓ サングラスや帽子は外す</li>
               <li>✓ 髪で顔が隠れないようにする</li>
+              <li>✓ 前髪は手で上げて額を出す</li>
             </ul>
           </div>
           <p className="text-center text-xs text-[#bbb] mt-4">アップロードされた写真は診断後すぐに削除されます</p>
