@@ -40,13 +40,15 @@ export function Header() {
           >
             FAQ
           </Link>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-[#E8A0A0] text-[#E8A0A0] hover:bg-[#E8A0A0]/10"
-          >
-            ログイン
-          </Button>
+          <Link href="/login">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-[#E8A0A0] text-[#E8A0A0] hover:bg-[#E8A0A0]/10"
+            >
+              ログイン
+            </Button>
+          </Link>
         </nav>
 
         {/* Mobile Navigation */}
@@ -77,12 +79,14 @@ export function Header() {
               >
                 FAQ
               </Link>
-              <Button
-                variant="outline"
-                className="border-[#E8A0A0] text-[#E8A0A0] hover:bg-[#E8A0A0]/10 mt-4"
-              >
-                ログイン
-              </Button>
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  className="border-[#E8A0A0] text-[#E8A0A0] hover:bg-[#E8A0A0]/10 mt-4"
+                >
+                  ログイン
+                </Button>
+              </Link>
             </nav>
           </SheetContent>
         </Sheet>
