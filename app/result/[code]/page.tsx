@@ -4,7 +4,7 @@ import { HeroSection } from '@/components/face-code/hero-section'
 import { PersonalitySection } from '@/components/face-code/personality-section'
 import { DiagnosisBasisSection } from '@/components/face-code/diagnosis-basis-section'
 import { FamousExamplesSection } from '@/components/face-code/famous-examples-section'
-import { CommunityCommentsSection } from '@/components/face-code/community-comments-section'
+// import { CommunityCommentsSection } from '@/components/face-code/community-comments-section'
 import { UpgradeCta } from '@/components/face-code/upgrade-cta'
 import { ShareSection } from '@/components/face-code/share-section'
 import { Footer } from '@/components/face-code/footer'
@@ -263,7 +263,7 @@ export default async function ResultPage({
       {/* 国別統計 */}
       <CountryStatsSection currentTypeCode={normalizedCode} />
 
-      <CommunityCommentsSection typeName={typeInfo.name} typeCode={normalizedCode} />
+      {/* <CommunityCommentsSection typeName={typeInfo.name} typeCode={normalizedCode} /> */}
 
       <UpgradeCta code={normalizedCode} />
 
