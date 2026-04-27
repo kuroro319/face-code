@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowser } from '@/lib/supabase-client';
 
@@ -69,8 +69,15 @@ export default function DiagnosePage() {
   const [activeKey, setActiveKey] = useState<FaceKey>('F');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    getSupabaseBrowser().auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+  }, []);
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
@@ -140,6 +147,40 @@ export default function DiagnosePage() {
           <p className="text-sm tracking-widest text-[#E8A0A0] mb-3 uppercase">Step 1</p>
           <h2 className="text-3xl font-bold text-[#2D2D2D] mb-2">写真をアップロード</h2>
           <p className="text-[#888] mb-6 text-sm">正面を向いた顔写真を使用してください</p>
+
+          {!user && (
+            <div style={{
+              backgroundColor: '#fff',
+              borderRadius: '12px',
+              borderLeft: '4px solid #E8A0A0',
+              padding: '12px 16px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+            }}>
+              <p style={{ margin: 0, fontSize: '13px', color: '#888' }}>
+                💡 ログインすると診断結果をいつでも確認できます
+              </p>
+              <a
+                href="/login?next=/diagnose"
+                style={{
+                  backgroundColor: '#E8A0A0',
+                  color: '#fff',
+                  borderRadius: '8px',
+                  padding: '6px 14px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
+              >
+                ログイン / 新規登録
+              </a>
+            </div>
+          )}
 
           {!image ? (
             <div
