@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import { Sparkles, Eye, Flower2, Moon, ChevronDown, Shirt, GitCompare, Camera } from "lucide-react"
 import type { Plan } from "@/lib/face-types"
 import { MoleWrinkleCanvas, type DiagnosisResult } from "@/components/face-code/mole-wrinkle-canvas"
+import { getSupabaseBrowser } from "@/lib/supabase-client"
 
 // ─── タイプ別カラー定義 ──────────────────────────────────────
 const MAKEUP_COLORS: Record<string, Array<{ color: string; label: string }>> = {
@@ -355,33 +356,138 @@ function CompatibilityDetailSection({ entries }: { entries: CompatEntry[] }) {
   )
 }
 
+// ─── 軸メタデータ ────────────────────────────────────────────
+const AXIS_META = [
+  { key: "F", name: "Flow（エネルギー）",   pos: 0, labels: { R: "発信型", A: "吸収型" } },
+  { key: "A", name: "Affection（愛情）",    pos: 1, labels: { L: "情熱型", G: "秘愛型" } },
+  { key: "C", name: "Connection（対人）",   pos: 2, labels: { O: "開放型", S: "選縁型" } },
+  { key: "E", name: "Emotion（感情）",      pos: 3, labels: { H: "直感型", M: "意志型" } },
+] as const
+
 // ─── 過去の診断との比較 ──────────────────────────────────────
-function PastDiagnosisSection() {
-  const [history, setHistory] = useState<Array<{ code: string; date: string }>>([])
+function PastDiagnosisSection({ currentCode }: { currentCode: string }) {
+  const [prevEntry, setPrevEntry] = useState<{ code: string; date: string } | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('face_code_history')
-      if (raw) setHistory(JSON.parse(raw))
-    } catch { /* ignore */ }
+    async function fetchHistory() {
+      try {
+        const supabase = getSupabaseBrowser()
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (session?.access_token) {
+          const res = await fetch("/api/diagnoses/history", {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          })
+          if (res.ok) {
+            const { history } = await res.json() as {
+              history: Array<{ type_code: string; created_at: string }>
+            }
+            // history[0]=今回, history[1]=前回
+            if (history.length >= 2) {
+              setPrevEntry({
+                code: history[1].type_code,
+                date: new Date(history[1].created_at).toLocaleDateString("ja-JP"),
+              })
+            }
+          }
+        } else {
+          // 未ログイン時はlocalStorageにフォールバック
+          const raw = localStorage.getItem("face_code_history")
+          if (raw) {
+            const arr = JSON.parse(raw) as Array<{ code: string; date: string }>
+            if (arr.length >= 2) setPrevEntry(arr[arr.length - 2])
+          }
+        }
+      } catch { /* ignore */ }
+      setLoading(false)
+    }
+    fetchHistory()
   }, [])
 
+  if (loading) {
+    return <div style={{ textAlign: "center", padding: "16px", color: "#aaa", fontSize: "13px" }}>読み込み中…</div>
+  }
+
+  if (!prevEntry) {
+    return (
+      <div style={{ textAlign: "center", padding: "20px 0", color: "#aaa", fontSize: "13px" }}>
+        <p style={{ margin: "0 0 6px" }}>🔍 過去の診断が2回以上あると比較が表示されます</p>
+        <p style={{ margin: 0, fontSize: "12px" }}>診断を繰り返すことで変化を追跡できます</p>
+      </div>
+    )
+  }
+
+  const allSame = prevEntry.code === currentCode
+
   return (
-    <div>
-      {history.length < 2 ? (
-        <div style={{ textAlign: "center", padding: "20px 0", color: "#aaa", fontSize: "13px" }}>
-          <p style={{ margin: "0 0 6px" }}>🔍 過去の診断が2回以上あると比較が表示されます</p>
-          <p style={{ margin: 0, fontSize: "12px" }}>診断を繰り返すことで変化を追跡できます</p>
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      {/* コードサマリー行 */}
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "10px 14px", backgroundColor: "#F5F5FF", borderRadius: "12px",
+      }}>
+        <div>
+          <span style={{ fontSize: "11px", color: "#888", marginRight: "6px" }}>前回</span>
+          <span style={{ fontSize: "15px", fontWeight: 700, color: "#7070AA", letterSpacing: "2px" }}>{prevEntry.code}</span>
+          <span style={{ fontSize: "11px", color: "#bbb", marginLeft: "6px" }}>({prevEntry.date})</span>
         </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {history.slice(-5).reverse().map((h, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", backgroundColor: "#FFF8F5", borderRadius: "12px" }}>
-              <span style={{ fontSize: "16px", fontWeight: 700, color: "#C9546E", letterSpacing: "2px" }}>{h.code}</span>
-              <span style={{ fontSize: "12px", color: "#aaa" }}>{h.date}</span>
-            </div>
-          ))}
+        <span style={{ color: "#C9546E", fontWeight: 700, fontSize: "16px" }}>→</span>
+        <div>
+          <span style={{ fontSize: "11px", color: "#888", marginRight: "6px" }}>今回</span>
+          <span style={{ fontSize: "15px", fontWeight: 700, color: "#C9546E", letterSpacing: "2px" }}>{currentCode}</span>
         </div>
+      </div>
+
+      {/* 軸ごとの比較 */}
+      {AXIS_META.map(axis => {
+        const prevVal = prevEntry.code[axis.pos] ?? ""
+        const currVal = currentCode[axis.pos] ?? ""
+        const isChanged = prevVal !== currVal
+        const prevLabel = (axis.labels as Record<string, string>)[prevVal] ?? prevVal
+        const currLabel = (axis.labels as Record<string, string>)[currVal] ?? currVal
+        return (
+          <div
+            key={axis.key}
+            style={{
+              display: "flex", alignItems: "center", gap: "10px",
+              padding: "12px 14px", borderRadius: "12px",
+              backgroundColor: isChanged ? "#FFF0F4" : "#F8F8F8",
+              border: `1px solid ${isChanged ? "#F0C0D0" : "#eee"}`,
+            }}
+          >
+            <span style={{
+              width: "26px", height: "26px", borderRadius: "50%", flexShrink: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "11px", fontWeight: 700,
+              backgroundColor: isChanged ? "#C9546E" : "#ccc", color: "#fff",
+            }}>
+              {axis.key}
+            </span>
+            <span style={{ fontSize: "11px", color: "#888", flex: "0 0 auto", minWidth: "100px" }}>
+              {axis.name}
+            </span>
+            {isChanged ? (
+              <span style={{ fontSize: "13px", flex: 1 }}>
+                <span style={{ color: "#7070AA", fontWeight: 600 }}>{prevLabel}</span>
+                <span style={{ color: "#C9546E", margin: "0 6px" }}>→</span>
+                <span style={{ color: "#C9546E", fontWeight: 700 }}>{currLabel}</span>
+                <span style={{ fontSize: "11px", color: "#C9546E", marginLeft: "6px" }}>に変化</span>
+              </span>
+            ) : (
+              <span style={{ fontSize: "13px", color: "#aaa", flex: 1 }}>
+                <span style={{ fontWeight: 600, color: "#888" }}>{currLabel}</span>
+                <span style={{ marginLeft: "8px", fontSize: "11px" }}>変化なし</span>
+              </span>
+            )}
+          </div>
+        )
+      })}
+
+      {allSame && (
+        <p style={{ textAlign: "center", fontSize: "12px", color: "#aaa", margin: "4px 0 0" }}>
+          全軸が前回と同じです。安定したタイプの持ち主です。
+        </p>
       )}
     </div>
   )
@@ -596,7 +702,7 @@ export function PurchasedContent({ code, plan }: Props) {
 
       {plan === "subscription" && (
         <Section icon={GitCompare} title="過去の診断との比較" accentColor="#A0A8D4">
-          <PastDiagnosisSection />
+          <PastDiagnosisSection currentCode={code} />
         </Section>
       )}
     </div>

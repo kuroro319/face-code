@@ -180,7 +180,19 @@ export async function POST(request: NextRequest) {
         process.env.SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
-      await supabase.from('diagnoses').insert({ type_code: code });
+
+      let userId: string | null = null;
+      const authHeader = request.headers.get('Authorization');
+      if (authHeader?.startsWith('Bearer ')) {
+        const { data: { user } } = await supabase.auth.getUser(authHeader.slice(7));
+        userId = user?.id ?? null;
+      }
+
+      await supabase.from('diagnoses').insert({
+        type_code: code,
+        reasons: reasons ?? null,
+        ...(userId ? { user_id: userId } : {}),
+      });
     } catch (logError) {
       console.error('診断ログ記録エラー:', logError);
     }

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { getSupabaseBrowser } from '@/lib/supabase-client';
 
 type FaceKey = 'F' | 'A' | 'C' | 'E';
 
@@ -90,9 +91,15 @@ export default function DiagnosePage() {
     setIsLoading(true);
     setError(null);
     try {
+      const supabase = getSupabaseBrowser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
       const res = await fetch('/api/diagnose', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ image }),
       });
       const data = await res.json();
