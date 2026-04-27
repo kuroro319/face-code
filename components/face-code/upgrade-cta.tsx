@@ -353,23 +353,12 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
                   display: "block", width: "100%", textAlign: "center",
                   padding: "13px", backgroundColor: "#E8A0A0", color: "#fff",
                   borderRadius: "12px", fontSize: "15px", fontWeight: 700,
-                  textDecoration: "none", marginBottom: "10px",
+                  textDecoration: "none",
                   boxSizing: "border-box",
                 }}
               >
                 ログインして購入する
               </a>
-              <button
-                onClick={handleProceedWithoutLogin}
-                disabled={loading}
-                style={{
-                  display: "block", width: "100%", textAlign: "center",
-                  padding: "10px", background: "none", border: "none",
-                  fontSize: "13px", color: "#aaa", cursor: "pointer",
-                }}
-              >
-                ログインせずに購入する
-              </button>
             </div>
           </div>
         </div>
