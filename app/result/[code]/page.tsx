@@ -253,28 +253,33 @@ export default async function ResultPage({
     const supabase = createServerClient(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { cookies: { getAll: () => cookieStore.getAll() } }
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+        },
+      }
     )
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const userId = session?.user?.id ?? null
+    if (userId) {
       const { data: subPurchase } = await supabase
         .from('purchases')
         .select('plan')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('plan', 'subscription')
-        .limit(1)
-        .single()
+        .maybeSingle()
       if (subPurchase) {
         plan = 'subscription'
       } else {
         const { data: fullPurchase } = await supabase
           .from('purchases')
           .select('plan')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .eq('face_code', normalizedCode)
           .eq('plan', 'full')
-          .limit(1)
-          .single()
+          .maybeSingle()
         if (fullPurchase) plan = 'full'
       }
     }
