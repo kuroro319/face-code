@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Mail, Lock, Eye, EyeOff, CheckCircle } from "lucide-react"
 import { getSupabaseBrowser } from "@/lib/supabase-client"
 
 type Tab = "login" | "signup"
 
-export default function LoginPage() {
+function LoginPageInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextPath = searchParams.get("next") ?? "/"
   const [tab, setTab] = useState<Tab>("login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -33,7 +35,7 @@ export default function LoginPage() {
     if (err) {
       setError("メールアドレスまたはパスワードが正しくありません。")
     } else {
-      router.replace("/")
+      router.replace(nextPath)
     }
   }
 
@@ -48,7 +50,7 @@ export default function LoginPage() {
     setError("")
     const redirectTo =
       typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback?next=/`
+        ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
         : "/auth/callback"
     const { error: err } = await supabase.auth.signUp({
       email: email.trim(),
@@ -448,5 +450,13 @@ export default function LoginPage() {
         ← トップページへ戻る
       </Link>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", backgroundColor: "#FFF8F5" }} />}>
+      <LoginPageInner />
+    </Suspense>
   )
 }

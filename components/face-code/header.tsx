@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/sheet"
 
 export function Header() {
+  const pathname = usePathname()
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#FFF8F5]/80 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -40,7 +42,7 @@ export function Header() {
           >
             FAQ
           </Link>
-          <Link href="/login">
+          <Link href={`/login?next=${encodeURIComponent(pathname)}`}>
             <Button
               variant="outline"
               size="sm"
@@ -79,7 +81,7 @@ export function Header() {
               >
                 FAQ
               </Link>
-              <Link href="/login">
+              <Link href={`/login?next=${encodeURIComponent(pathname)}`}>
                 <Button
                   variant="outline"
                   className="border-[#E8A0A0] text-[#E8A0A0] hover:bg-[#E8A0A0]/10 mt-4"
