@@ -43,6 +43,8 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [modalPlan, setModalPlan] = useState<PlanType | null>(null)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [pendingPlan, setPendingPlan] = useState<PlanType | null>(null)
 
   const plans = {
     full: {
@@ -76,16 +78,13 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
     }
   }
 
-  const handlePurchase = async (plan?: PlanType) => {
-    const targetPlan = plan ?? selectedPlan
+  const executeCheckout = async (targetPlan: PlanType, accessToken?: string) => {
     setLoading(true)
     setError(null)
     try {
-      const supabase = getSupabaseBrowser()
-      const { data: { session } } = await supabase.auth.getSession()
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
+      if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`
       }
       const res = await fetch('/api/checkout', {
         method: 'POST',
@@ -102,6 +101,26 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
       setError('ネットワークエラーが発生しました。時間をおいて再度お試しください。')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handlePurchase = async (plan?: PlanType) => {
+    const targetPlan = plan ?? selectedPlan
+    const supabase = getSupabaseBrowser()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      setPendingPlan(targetPlan)
+      setShowLoginModal(true)
+      return
+    }
+    await executeCheckout(targetPlan, session.access_token)
+  }
+
+  const handleProceedWithoutLogin = async () => {
+    setShowLoginModal(false)
+    if (pendingPlan) {
+      await executeCheckout(pendingPlan, undefined)
+      setPendingPlan(null)
     }
   }
 
@@ -269,6 +288,92 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
           </div>
         </div>
       </div>
+
+      {/* Login prompt modal */}
+      {showLoginModal && (
+        <div
+          style={{
+            position: "fixed", inset: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 200,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowLoginModal(false) }}
+        >
+          <div style={{
+            backgroundColor: "#fff", borderRadius: "24px",
+            width: "100%", maxWidth: "420px",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.18)",
+            overflow: "hidden",
+          }}>
+            {/* Header */}
+            <div style={{
+              background: "linear-gradient(135deg, #E8A0A0, #D4847B)",
+              padding: "24px 24px 20px",
+              color: "#fff",
+              position: "relative",
+            }}>
+              <button
+                onClick={() => setShowLoginModal(false)}
+                style={{
+                  position: "absolute", top: "14px", right: "14px",
+                  background: "rgba(255,255,255,0.25)", border: "none",
+                  borderRadius: "50%", width: "28px", height: "28px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", color: "#fff",
+                }}
+              >
+                <X style={{ width: "14px", height: "14px" }} />
+              </button>
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>
+                ログインして購入しませんか？
+              </h3>
+            </div>
+            {/* Body */}
+            <div style={{ padding: "20px 24px 24px" }}>
+              <p style={{ margin: "0 0 12px", fontSize: "13px", color: "#555" }}>
+                ログインすると以下のメリットがあります：
+              </p>
+              <ul style={{ margin: "0 0 20px", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[
+                  "購入後いつでも診断結果を確認できる",
+                  "何度診断しても継続プランの特典が使える",
+                  "過去の診断履歴を振り返れる",
+                ].map((text, i) => (
+                  <li key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", fontSize: "13px", color: "#444" }}>
+                    <Check style={{ width: "14px", height: "14px", color: "#E8A0A0", flexShrink: 0, marginTop: "1px" }} />
+                    {text}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={`/login?next=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname + window.location.search : "/")}`}
+                style={{
+                  display: "block", width: "100%", textAlign: "center",
+                  padding: "13px", backgroundColor: "#E8A0A0", color: "#fff",
+                  borderRadius: "12px", fontSize: "15px", fontWeight: 700,
+                  textDecoration: "none", marginBottom: "10px",
+                  boxSizing: "border-box",
+                }}
+              >
+                ログインして購入する
+              </a>
+              <button
+                onClick={handleProceedWithoutLogin}
+                disabled={loading}
+                style={{
+                  display: "block", width: "100%", textAlign: "center",
+                  padding: "10px", background: "none", border: "none",
+                  fontSize: "13px", color: "#aaa", cursor: "pointer",
+                }}
+              >
+                ログインせずに購入する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Detail Modal */}
       {modalPlan && modalDetail && (
