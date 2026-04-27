@@ -11,7 +11,7 @@ import { Footer } from '@/components/face-code/footer'
 interface MypageData {
   email: string
   purchases: Array<{ plan: string; face_code: string; created_at: string | null }>
-  diagnoses: Array<{ type_code: string; created_at: string }>
+  diagnoses: Array<{ id: string; type_code: string; created_at: string }>
 }
 
 const PLAN_LABEL: Record<string, string> = {
@@ -178,7 +178,7 @@ export default function MyPage() {
               {data.diagnoses.map((d, i) => (
                 <Link
                   key={i}
-                  href={`/result/${d.type_code}`}
+                  href={`/result/${d.type_code}?diagId=${d.id}`}
                   style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '12px 14px', backgroundColor: '#FFF8F5', borderRadius: '12px',

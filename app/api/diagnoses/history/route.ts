@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('diagnoses')
-    .select('type_code, created_at')
+    .select('id, type_code, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(5);

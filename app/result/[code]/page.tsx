@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { getSupabase } from '@/lib/supabase'
 import { Header } from '@/components/face-code/header'
 import { HeroSection } from '@/components/face-code/hero-section'
 import { PersonalitySection } from '@/components/face-code/personality-section'
@@ -218,14 +219,28 @@ function normalizeCode(raw: string): string {
 // ── ページ ────────────────────────────────────────────────────────────────
 export default async function ResultPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ code: string }>
+  searchParams: Promise<{ diagId?: string }>
 }) {
   const { code } = await params
+  const { diagId } = await searchParams
   const normalizedCode = normalizeCode(code)
   const typeInfo = TYPES[normalizedCode]
 
   if (!typeInfo) notFound()
+
+  let diagnosisReasons: Record<string, string> | null = null
+  if (diagId) {
+    const supabase = getSupabase()
+    const { data } = await supabase
+      .from('diagnoses')
+      .select('reasons')
+      .eq('id', diagId)
+      .single()
+    diagnosisReasons = (data?.reasons as Record<string, string>) ?? null
+  }
 
   const displayCode = normalizedCode
   const characterImage = `/${typeInfo.name}.png`
@@ -248,7 +263,7 @@ export default async function ResultPage({
 
       <PersonalitySection paragraphs={typeInfo.descriptions} />
 
-      <DiagnosisBasisSection code={normalizedCode} />
+      <DiagnosisBasisSection code={normalizedCode} initialReasons={diagnosisReasons} />
 
       <FamousExamplesSection celebrities={celebrities} />
 

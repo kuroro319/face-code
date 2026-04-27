@@ -11,6 +11,7 @@ interface DiagnoseReasons {
 
 interface DiagnosisBasisSectionProps {
   code: string
+  initialReasons?: Record<string, string> | null
 }
 
 const AXIS_INFO: Record<string, { axis: 'F' | 'A' | 'C' | 'E'; label: string; feature: string; color: string }> = {
@@ -26,10 +27,13 @@ const AXIS_INFO: Record<string, { axis: 'F' | 'A' | 'C' | 'E'; label: string; fe
 
 const AXIS_DISPLAY = ['F', 'A', 'C', 'E'] as const
 
-export function DiagnosisBasisSection({ code }: DiagnosisBasisSectionProps) {
-  const [reasons, setReasons] = useState<DiagnoseReasons | null>(null)
+export function DiagnosisBasisSection({ code, initialReasons }: DiagnosisBasisSectionProps) {
+  const [reasons, setReasons] = useState<DiagnoseReasons | null>(
+    initialReasons ? (initialReasons as DiagnoseReasons) : null
+  )
 
   useEffect(() => {
+    if (initialReasons) return
     const stored = sessionStorage.getItem('faceCodeReasons')
     if (stored) {
       try {
@@ -38,7 +42,7 @@ export function DiagnosisBasisSection({ code }: DiagnosisBasisSectionProps) {
         // ignore malformed data
       }
     }
-  }, [])
+  }, [initialReasons])
 
   const letters = code.toUpperCase().split('')
 
