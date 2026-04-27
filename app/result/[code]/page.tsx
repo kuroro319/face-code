@@ -1,5 +1,8 @@
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 import { getSupabase } from '@/lib/supabase'
+import type { Plan } from '@/lib/face-types'
 import { Header } from '@/components/face-code/header'
 import { HeroSection } from '@/components/face-code/hero-section'
 import { PersonalitySection } from '@/components/face-code/personality-section'
@@ -7,6 +10,7 @@ import { DiagnosisBasisSection } from '@/components/face-code/diagnosis-basis-se
 import { FamousExamplesSection } from '@/components/face-code/famous-examples-section'
 // import { CommunityCommentsSection } from '@/components/face-code/community-comments-section'
 import { UpgradeCta } from '@/components/face-code/upgrade-cta'
+import { PurchasedContent } from '@/components/face-code/purchased-content'
 import { ShareSection } from '@/components/face-code/share-section'
 import { Footer } from '@/components/face-code/footer'
 import CompatibilitySection from '@/components/result/CompatibilitySection'
@@ -242,6 +246,48 @@ export default async function ResultPage({
     diagnosisReasons = (data?.reasons as Record<string, string>) ?? null
   }
 
+  // 購入判定
+  let userPlan: Plan | null = null
+  try {
+    const cookieStore = await cookies()
+    const supabaseAuth = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return cookieStore.getAll() },
+          setAll() {},
+        },
+      }
+    )
+    const { data: { user } } = await supabaseAuth.auth.getUser()
+    if (user) {
+      const supabase = getSupabase()
+      const { data: subData } = await supabase
+        .from('purchases')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('plan', 'subscription')
+        .limit(1)
+        .maybeSingle()
+      if (subData) {
+        userPlan = 'subscription'
+      } else {
+        const { data: fullData } = await supabase
+          .from('purchases')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('plan', 'full')
+          .eq('face_code', normalizedCode)
+          .limit(1)
+          .maybeSingle()
+        if (fullData) userPlan = 'full'
+      }
+    }
+  } catch {
+    // 未設定時はnullのまま
+  }
+
   const displayCode = normalizedCode
   const characterImage = `/${typeInfo.name}.png`
 
@@ -280,7 +326,11 @@ export default async function ResultPage({
 
       {/* <CommunityCommentsSection typeName={typeInfo.name} typeCode={normalizedCode} /> */}
 
-      <UpgradeCta code={normalizedCode} />
+      {userPlan ? (
+        <PurchasedContent code={normalizedCode} plan={userPlan} />
+      ) : (
+        <UpgradeCta code={normalizedCode} />
+      )}
 
       <ShareSection
         code={displayCode}
