@@ -29,7 +29,7 @@ const AXIS_DISPLAY = ['F', 'A', 'C', 'E'] as const
 
 export function DiagnosisBasisSection({ code, initialReasons }: DiagnosisBasisSectionProps) {
   const [reasons, setReasons] = useState<DiagnoseReasons | null>(
-    initialReasons ? (initialReasons as DiagnoseReasons) : null
+    initialReasons ? (initialReasons as unknown as DiagnoseReasons) : null
   )
 
   useEffect(() => {
