@@ -178,7 +178,7 @@ export default function MyPage() {
               {data.diagnoses.map((d, i) => (
                 <Link
                   key={i}
-                  href={`/result/${d.type_code}?diagId=${d.id}`}
+                  href={d.id ? `/result/${d.type_code}?diagId=${d.id}` : `/result/${d.type_code}`}
                   style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '12px 14px', backgroundColor: '#FFF8F5', borderRadius: '12px',

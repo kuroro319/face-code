@@ -247,41 +247,35 @@ export default async function ResultPage({
   }
 
   // 購入判定
-  let userPlan: Plan | null = null
+  let plan: Plan | null = null
   try {
     const cookieStore = await cookies()
-    const supabaseAuth = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return cookieStore.getAll() },
-          setAll() {},
-        },
-      }
+    const supabase = createServerClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { cookies: { getAll: () => cookieStore.getAll() } }
     )
-    const { data: { user } } = await supabaseAuth.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const supabase = getSupabase()
-      const { data: subData } = await supabase
+      const { data: subPurchase } = await supabase
         .from('purchases')
-        .select('id')
+        .select('plan')
         .eq('user_id', user.id)
         .eq('plan', 'subscription')
         .limit(1)
-        .maybeSingle()
-      if (subData) {
-        userPlan = 'subscription'
+        .single()
+      if (subPurchase) {
+        plan = 'subscription'
       } else {
-        const { data: fullData } = await supabase
+        const { data: fullPurchase } = await supabase
           .from('purchases')
-          .select('id')
+          .select('plan')
           .eq('user_id', user.id)
-          .eq('plan', 'full')
           .eq('face_code', normalizedCode)
+          .eq('plan', 'full')
           .limit(1)
-          .maybeSingle()
-        if (fullData) userPlan = 'full'
+          .single()
+        if (fullPurchase) plan = 'full'
       }
     }
   } catch {
@@ -326,8 +320,8 @@ export default async function ResultPage({
 
       {/* <CommunityCommentsSection typeName={typeInfo.name} typeCode={normalizedCode} /> */}
 
-      {userPlan ? (
-        <PurchasedContent code={normalizedCode} plan={userPlan} />
+      {plan ? (
+        <PurchasedContent code={normalizedCode} plan={plan} />
       ) : (
         <UpgradeCta code={normalizedCode} />
       )}

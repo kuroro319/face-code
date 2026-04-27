@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   // 診断履歴（user_idで取得）
   const { data: diagnoses } = await supabase
     .from('diagnoses')
-    .select('type_code, created_at')
+    .select('id, type_code, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
