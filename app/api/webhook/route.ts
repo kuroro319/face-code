@@ -25,13 +25,14 @@ export async function POST(request: NextRequest) {
   // 通常購入・初回サブスク
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const { face_code, plan } = session.metadata ?? {}
+    const { face_code, plan, user_id } = session.metadata ?? {}
     if (face_code && plan) {
       await supabase.from('purchases').upsert({
         stripe_session_id: session.id,
         face_code,
         plan,
         stripe_customer_id: session.customer as string | null,
+        ...(user_id ? { user_id } : {}),
       })
     }
   }

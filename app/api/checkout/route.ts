@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -17,12 +18,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
     }
 
+    let userId: string | null = null
+    const authHeader = request.headers.get('Authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      const supabase = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      const { data: { user } } = await supabase.auth.getUser(authHeader.slice(7))
+      userId = user?.id ?? null
+    }
+
     const origin = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://face-code-xi.vercel.app'
 
     const session = await stripe.checkout.sessions.create({
       mode: plan === 'subscription' ? 'subscription' : 'payment',
       line_items: [{ price: priceId, quantity: 1 }],
-      metadata: { face_code: code, plan },
+      metadata: { face_code: code, plan, user_id: userId ?? '' },
       success_url: `${origin}/result/${code}/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
       cancel_url: `${origin}/result/${code}`,
     })

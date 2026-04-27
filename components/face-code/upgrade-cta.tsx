@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Sparkles, Eye, ChevronRight, Check, Lock, CreditCard, Flower2, Moon, Shirt, GitCompare, Camera, RefreshCw, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getSupabaseBrowser } from "@/lib/supabase-client"
 
 type PlanType = "full" | "subscription"
 
@@ -80,9 +81,15 @@ export function UpgradeCta({ code }: UpgradeCtaProps) {
     setLoading(true)
     setError(null)
     try {
+      const supabase = getSupabaseBrowser()
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
       const res = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ plan: targetPlan, code }),
       })
       const data = await res.json()
